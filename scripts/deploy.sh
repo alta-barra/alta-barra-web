@@ -31,7 +31,7 @@ rm -rf infrastructure.tf.plan
 REPOSITORY_URL=$(tofu output -raw ecr_repository_url)
 REPOSITORY_BASE_URL=$(sed -r 's#([^/])/[^/].*#\1#' <<< ${REPOSITORY_URL})
 aws ecr get-login-password --region us-east-1 | \
-    podman login --username AWS --password-stdin ${REPOSITORY_BASE_URL}
+    docker login --username AWS --password-stdin ${REPOSITORY_BASE_URL}
 
 # Navigate back to the root directory
 cd ../

@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   deployment:
-    name: Deployment
+    name: Deploy to Production
     runs-on: ubuntu-latest
     environment: production
 
