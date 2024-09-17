@@ -30,5 +30,5 @@ jobs:
         env:
           AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
           TF_VAR_public_ec2_key: ${{ var.PUBLIC_EC2_KEY }}
-          TF_VAR_aws_access_key_id: ${{ var.AWS_ACCESS_KEY_ID }}
-          TF_VAR_aws_secret_access_key: ${{ var.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
