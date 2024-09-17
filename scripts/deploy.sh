@@ -7,16 +7,6 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# # Check for Docker and Podman
-# if command_exists docker; then
-#     alias podman=docker
-# elif command_exists podman; then
-#     echo "Podman installed"
-# else
-#     echo "Error: Neither Docker nor Podman is installed."
-#     exit 1
-# fi
-
 ## Deploy Infrastructure  ====================================================
 # Generate a random hash
 HASH=$(openssl rand -hex 12)
