@@ -21,13 +21,11 @@ jobs:
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ vars.AWS_GITHUB_ROLE }}
-
       - name: AWS Account
         run: aws sts get-caller-identity
-
       - name: Deploy
+        working-directory: ./scripts
+        run: ./deploy.sh
         env:
           AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
-        run: |
-          cd dev
-          ./deploy.sh
+        
