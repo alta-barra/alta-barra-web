@@ -314,8 +314,8 @@ resource "aws_iam_role" "ecs_service_role" {
 
 data "aws_iam_policy_document" "ecs_service_policy" {
   statement {
+    effect = "Allow"
     actions = [
-      "sts:AssumeRole",
       "rds-db:connect",
       "rds:Describe*",
       "rds:ListTagsForResource",
