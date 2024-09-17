@@ -314,16 +314,8 @@ resource "aws_iam_role" "ecs_service_role" {
 
 data "aws_iam_policy_document" "ecs_service_policy" {
   statement {
-    effect = "Allow"
-    actions = [
-      "rds-db:connect",
-      "rds:Describe*",
-      "rds:ListTagsForResource",
-      "rds:DescribeDBInstances",
-      "rds:DescribeDBClusters",
-      "rds:DescribeDBClusterEndpoints"
-    ]
-    effect = "Allow"
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
 
     principals {
       type        = "Service"
@@ -777,6 +769,25 @@ resource "aws_route53_record" "service_record" {
   }
 }
 
+resource "aws_iam_role_policy" "ecs_task_rds_access" {
+  name = "${var.namespace}_ECS_TaskRDSAccess_${var.environment}"
+  role = aws_iam_role.ecs_task_iam_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "rds-db:connect"
+        ]
+        Resource = [
+          "${module.rds.db_instance_arn}"
+        ]
+      }
+    ]
+  })
+}
 
 resource "aws_security_group" "rds" {
   name        = "${var.namespace}_RDS_SecurityGroup_${var.environment}"
