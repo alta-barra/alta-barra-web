@@ -195,19 +195,8 @@ resource "aws_launch_template" "ecs_launch_template" {
     enabled = true
   }
 
-  # TODO use this once opentofu supports it (see below )
-  #user_data              = base64encode(data.template_file.user_data.rendered)
   user_data = base64encode(templatefile("./modules/ecs/user_data.sh", { ecs_cluster_name : aws_ecs_cluster.default.name }))
 }
-
-# TODO use this once opentofu supports it (see above)
-# data "template_file" "user_data" {
-#   template = file("./modules/ecs/user_data.sh")
-
-#   vars = {
-#     ecs_cluster_name = aws_ecs_cluster.default.name
-#   }
-# }
 
 resource "aws_iam_role" "ec2_instance_role" {
   name               = "${var.namespace}_EC2_InstanceRole_${var.environment}"
@@ -225,6 +214,19 @@ resource "aws_iam_instance_profile" "ec2_instance_role_profile" {
 }
 
 data "aws_iam_policy_document" "ec2_instance_role_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "rds-db:connect",
+      "rds:Describe*",
+      "rds:ListTagsForResource",
+      "rds:DescribeDBInstances",
+      "rds:DescribeDBClusters",
+      "rds:DescribeDBClusterEndpoints"
+    ]
+    resources = ["*"]
+  }
+
   statement {
     actions = ["sts:AssumeRole"]
     effect  = "Allow"
