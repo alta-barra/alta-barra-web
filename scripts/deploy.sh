@@ -7,15 +7,15 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Check for Docker and Podman
-if command_exists docker; then
-    alias podman=docker
-elif command_exists podman; then
-    echo "Podman installed"
-else
-    echo "Error: Neither Docker nor Podman is installed."
-    exit 1
-fi
+# # Check for Docker and Podman
+# if command_exists docker; then
+#     alias podman=docker
+# elif command_exists podman; then
+#     echo "Podman installed"
+# else
+#     echo "Error: Neither Docker nor Podman is installed."
+#     exit 1
+# fi
 
 ## Deploy Infrastructure  ====================================================
 # Generate a random hash
@@ -49,8 +49,8 @@ cd ../
 ## Deploy Application ========================================================
 # Build Docker image and tag new versions for every deployment
 APP_NAME=${1:-webapp}
-podman build --platform linux/amd64 -t altabarra/${APP_NAME} .
-podman tag altabarra/${APP_NAME}:latest ${REPOSITORY_URL}:latest
-podman tag altabarra/${APP_NAME}:latest ${REPOSITORY_URL}:${HASH}
-podman push ${REPOSITORY_URL}:latest
-podman push ${REPOSITORY_URL}:${HASH}
+docker build --platform linux/amd64 -t altabarra/${APP_NAME} .
+docker tag altabarra/${APP_NAME}:latest ${REPOSITORY_URL}:latest
+docker tag altabarra/${APP_NAME}:latest ${REPOSITORY_URL}:${HASH}
+docker push ${REPOSITORY_URL}:latest
+docker push ${REPOSITORY_URL}:${HASH}
