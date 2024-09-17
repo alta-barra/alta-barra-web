@@ -267,8 +267,9 @@ resource "aws_db_subnet_group" "default" {
 module "rds" {
   source = "./modules/rds"
 
-  db_password_secret   = local.db_password_secret
-  db_subnet_group_name = aws_db_subnet_group.default.name
+  db_password_secret     = local.db_password_secret
+  db_subnet_group_name   = aws_db_subnet_group.default.name
+  vpc_security_group_ids = [aws_security_group.rds.id]
 }
 
 ## Logging ===================================================================
@@ -741,7 +742,7 @@ resource "aws_security_group" "bastion_host" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] ## The IP range could be limited to the developers IP addresses if they are fix
+    cidr_blocks = ["18.206.107.24/29"]
   }
 
   egress {
@@ -766,19 +767,6 @@ resource "aws_instance" "bastion_host" {
   }
 }
 
-# resource "aws_route53_record" "environment" {
-#   zone_id = data.aws_route53_zone.environment.id6sKvUtLBD5bHex3l4NWm7Fkt9WxaTjHUE/zbWcdxFcVK+cZMs0RmhTEx/WLsHTmt
-#   name    = var.domain_name
-#   type    = "NS"
-#   ttl     = 300
-#   records = [
-#     data.aws_route53_zone.environment.name_servers[0],
-#     data.aws_route53_zone.environment.name_servers[1],
-#     data.aws_route53_zone.environment.name_servers[2],
-#     data.aws_route53_zone.environment.name_servers[3]
-#   ]
-# }
-
 ## Point A record to CloudFront distribution
 resource "aws_route53_record" "service_record" {
   name    = var.domain_name
@@ -789,5 +777,40 @@ resource "aws_route53_record" "service_record" {
     name                   = aws_cloudfront_distribution.default.domain_name
     zone_id                = aws_cloudfront_distribution.default.hosted_zone_id
     evaluate_target_health = false
+  }
+}
+
+
+resource "aws_security_group" "rds" {
+  name        = "${var.namespace}_RDS_SecurityGroup_${var.environment}"
+  description = "Security group for RDS instance"
+  vpc_id      = aws_vpc.default.id
+
+  ingress {
+    description     = "Allow PostgreSQL access from ECS instances"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ec2.id]
+  }
+
+  ingress {
+    description     = "Allow PostgreSQL access from bastion host"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.bastion_host.id]
+  }
+
+  egress {
+    description = "Allow all egress traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = -1
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.namespace}_RDS_SecurityGroup_${var.environment}"
   }
 }

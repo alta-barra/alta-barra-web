@@ -1,2 +1,2 @@
-asg_min_size = 1
-asg_max_size = 1
+autoscaling_min_size = 1
+autoscaling_max_size = 1
