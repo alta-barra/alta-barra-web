@@ -17,6 +17,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
@@ -28,4 +29,6 @@ jobs:
         run: ./deploy.sh
         env:
           AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
-        
+          TF_VAR_public_ec2_key: ${{ var.PUBLIC_EC2_KEY }}
+          TF_VAR_aws_access_key_id: ${{ var.AWS_ACCESS_KEY_ID }}
+          TF_VAR_aws_secret_access_key: ${{ var.AWS_SECRET_ACCESS_KEY }}
