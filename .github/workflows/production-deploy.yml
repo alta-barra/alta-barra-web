@@ -1,0 +1,33 @@
+name: Deploy Production Environment
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+  permissions:
+    id-token: write
+    contents: read
+
+jobs:
+  deployment:
+    name: Deployment
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ vars.AWS_GITHUB_ROLE }}
+
+      - name: AWS Account
+        run: aws sts get-caller-identity
+
+      - name: Deploy
+        env:
+          AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
+        run: |
+          cd dev
+          ./deploy.sh
