@@ -215,19 +215,6 @@ resource "aws_iam_instance_profile" "ec2_instance_role_profile" {
 
 data "aws_iam_policy_document" "ec2_instance_role_policy" {
   statement {
-    effect = "Allow"
-    actions = [
-      "rds-db:connect",
-      "rds:Describe*",
-      "rds:ListTagsForResource",
-      "rds:DescribeDBInstances",
-      "rds:DescribeDBClusters",
-      "rds:DescribeDBClusterEndpoints"
-    ]
-    resources = ["*"]
-  }
-
-  statement {
     actions = ["sts:AssumeRole"]
     effect  = "Allow"
 
@@ -327,8 +314,16 @@ resource "aws_iam_role" "ecs_service_role" {
 
 data "aws_iam_policy_document" "ecs_service_policy" {
   statement {
-    actions = ["sts:AssumeRole"]
-    effect  = "Allow"
+    actions = [
+      "sts:AssumeRole",
+      "rds-db:connect",
+      "rds:Describe*",
+      "rds:ListTagsForResource",
+      "rds:DescribeDBInstances",
+      "rds:DescribeDBClusters",
+      "rds:DescribeDBClusterEndpoints"
+    ]
+    effect = "Allow"
 
     principals {
       type        = "Service"
