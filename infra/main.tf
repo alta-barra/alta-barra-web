@@ -27,8 +27,21 @@ data "aws_ami" "amazon_linux_2" {
 }
 
 ## Route53 Hosted Zone  ======================================================
-data "aws_route53_zone" "environment" {
-  name = "alta-barra.com"
+data "aws_route53_zone" "service" {
+  name = var.domain_name
+}
+
+resource "aws_route53_record" "service" {
+  zone_id = var.tld_zone_id
+  name    = var.domain_name
+  type    = "NS"
+  ttl     = 300
+  records = [
+    data.aws_route53_zone.service.name_servers[0],
+    data.aws_route53_zone.service.name_servers[1],
+    data.aws_route53_zone.service.name_servers[2],
+    data.aws_route53_zone.service.name_servers[3]
+  ]
 }
 
 resource "aws_acm_certificate" "alb_certificate" {
@@ -58,7 +71,7 @@ resource "aws_acm_certificate_validation" "cloudfront_certificate" {
 resource "aws_route53_record" "generic_certificate_validation" {
   name    = tolist(aws_acm_certificate.alb_certificate.domain_validation_options)[0].resource_record_name
   type    = tolist(aws_acm_certificate.alb_certificate.domain_validation_options)[0].resource_record_type
-  zone_id = data.aws_route53_zone.environment.id
+  zone_id = data.aws_route53_zone.service.id
   records = [tolist(aws_acm_certificate.alb_certificate.domain_validation_options)[0].resource_record_value]
   ttl     = 300
 }
@@ -757,10 +770,27 @@ resource "aws_instance" "bastion_host" {
 }
 
 ## Point A record to CloudFront distribution
+resource "aws_route53_zone" "environment" {
+  name = "${var.environment}.${var.domain_name}"
+}
+
+resource "aws_route53_record" "environment" {
+  zone_id = aws_route53_zone.service.id
+  name    = "${var.environment}.${var.domain_name}"
+  type    = "NS"
+  ttl     = 300
+  records = [
+    aws_route53_zone.environment.name_servers[0],
+    aws_route53_zone.environment.name_servers[1],
+    aws_route53_zone.environment.name_servers[2],
+    aws_route53_zone.environment.name_servers[3]
+  ]
+}
+
 resource "aws_route53_record" "service_record" {
-  name    = var.domain_name
+  name    = "${var.environment}.${var.domain_name}"
   type    = "A"
-  zone_id = data.aws_route53_zone.environment.id
+  zone_id = aws_route53_zone.environment.id
 
   alias {
     name                   = aws_cloudfront_distribution.default.domain_name
