@@ -775,7 +775,7 @@ resource "aws_route53_zone" "environment" {
 }
 
 resource "aws_route53_record" "environment" {
-  zone_id = aws_route53_zone.service.id
+  zone_id = data.aws_route53_zone.service.id
   name    = "${var.environment}.${var.domain_name}"
   type    = "NS"
   ttl     = 300
