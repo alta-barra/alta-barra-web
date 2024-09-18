@@ -45,7 +45,7 @@ RUN mkdir config
 # to be re-compiled.
 COPY config/config.exs config/${MIX_ENV}.exs config/
 RUN mkdir -p /etc/ssl/certs \
-    && curl https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem \
+    && curl https://truststore.pki.rds.amazonaws.com/us-east-1/us-east-1-bundle.pem \
     -o /etc/ssl/certs/rds-combined-ca-bundle.pem
 
 RUN mix deps.compile
