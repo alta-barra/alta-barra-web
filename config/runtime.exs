@@ -40,7 +40,7 @@ if config_env() == :prod do
   config :altabarra, Altabarra.Repo,
     ssl: true,
     ssl_opts: [
-      verify: :verify_peer,
+      verify: :verify_none,
       cacertfile: "/etc/ssl/certs/rds-combined-ca-bundle.pem"
     ],
     url: database_url,
