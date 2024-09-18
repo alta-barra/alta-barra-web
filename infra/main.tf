@@ -562,13 +562,7 @@ resource "aws_alb_listener_rule" "https_listener_rule" {
 
   condition {
     host_header {
-      values = ["${var.environment}.${var.domain_name}"]
-    }
-  }
-
-  condition {
-    host_header {
-      values = [var.domain_name]
+      values = [var.domain_name, "${var.environment}.${var.domain_name}"]
     }
   }
 
