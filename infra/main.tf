@@ -371,7 +371,7 @@ resource "aws_ecs_task_definition" "default" {
         },
         {
           "name" : "DATABASE_URL",
-          "value" : "ecto://altabarra:${module.rds.db_password}@${module.rds.db_address}/${module.rds.db_name}"
+          "value" : "ecto://altabarra:${module.rds.db_password}@${module.rds.db_endpoint}/${module.rds.db_name}"
         }
       ]
       portMappings = [

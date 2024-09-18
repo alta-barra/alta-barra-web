@@ -21,7 +21,7 @@ ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 FROM ${BUILDER_IMAGE} as builder
 
 # install build dependencies
-RUN apt-get update -y && apt-get install -y build-essential git \
+RUN apt-get update -y && apt-get install -y build-essential git curl \
     && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # prepare build dir
@@ -44,6 +44,10 @@ RUN mkdir config
 # to ensure any relevant config change will trigger the dependencies
 # to be re-compiled.
 COPY config/config.exs config/${MIX_ENV}.exs config/
+RUN mkdir -p /etc/ssl/certs \
+    && curl https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem \
+    -o /etc/ssl/certs/rds-combined-ca-bundle.pem
+
 RUN mix deps.compile
 
 COPY priv priv
@@ -60,6 +64,7 @@ RUN mix compile
 
 # Changes to config/runtime.exs don't require recompiling the code
 COPY config/runtime.exs config/
+
 
 COPY rel rel
 RUN mix release
@@ -88,6 +93,9 @@ ENV ERL_FLAGS="+JPperf true"
 
 # Only copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/altabarra ./
+RUN mkdir -p /etc/ssl/certs \
+    && curl https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem \
+    -o /etc/ssl/certs/rds-combined-ca-bundle.pem
 
 USER nobody
 
