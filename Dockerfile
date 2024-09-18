@@ -93,9 +93,8 @@ ENV ERL_FLAGS="+JPperf true"
 
 # Only copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/altabarra ./
-RUN mkdir -p /etc/ssl/certs \
-    && curl https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem \
-    -o /etc/ssl/certs/rds-combined-ca-bundle.pem
+RUN mkdir -p /etc/ssl/certs
+COPY --from=builder --chown=nobody:root /etc/ssl/certs/rds-combined-ca-bundle.pem /etc/ssl/certs/rds-combined-ca-bundle.pem
 
 USER nobody
 
