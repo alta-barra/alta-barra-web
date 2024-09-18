@@ -219,7 +219,7 @@ variable "autoscaling_min_size" {
 
 variable "custom_origin_host_header" {
   description = "Custom header to ensure communication only through CloudFront"
-  default     = "Demo123"
+  default     = "AltaBarra_CF"
   type        = string
 }
 
