@@ -9,3 +9,7 @@ output "ecs_cluster_name" {
 output "ecs_service_name" {
   value = aws_ecs_service.service.name
 }
+
+output "rds_db_instance_endpoint" {
+  value = module.rds.db_endpoint
+}
