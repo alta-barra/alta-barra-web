@@ -799,6 +799,18 @@ resource "aws_route53_record" "service_record" {
   }
 }
 
+resource "aws_route53_record" "root_service_record" {
+  name    = var.domain_name
+  type    = "A"
+  zone_id = aws_route53_zone.environment.id
+
+  alias {
+    name                   = aws_cloudfront_distribution.default.domain_name
+    zone_id                = aws_cloudfront_distribution.default.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
 resource "aws_iam_role_policy" "ecs_task_rds_access" {
   name = "${var.namespace}_ECS_TaskRDSAccess_${var.environment}"
   role = aws_iam_role.ecs_task_iam_role.id
