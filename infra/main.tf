@@ -31,18 +31,18 @@ data "aws_route53_zone" "service" {
   name = var.domain_name
 }
 
-resource "aws_route53_record" "service" {
-  zone_id = var.tld_zone_id
-  name    = var.domain_name
-  type    = "NS"
-  ttl     = 300
-  records = [
-    data.aws_route53_zone.service.name_servers[0],
-    data.aws_route53_zone.service.name_servers[1],
-    data.aws_route53_zone.service.name_servers[2],
-    data.aws_route53_zone.service.name_servers[3]
-  ]
-}
+# resource "aws_route53_record" "service" {
+#   zone_id = var.tld_zone_id
+#   name    = var.domain_name
+#   type    = "NS"
+#   ttl     = 300
+#   records = [
+#     data.aws_route53_zone.service.name_servers[0],
+#     data.aws_route53_zone.service.name_servers[1],
+#     data.aws_route53_zone.service.name_servers[2],
+#     data.aws_route53_zone.service.name_servers[3]
+#   ]
+# }
 
 resource "aws_acm_certificate" "alb_certificate" {
   domain_name               = var.domain_name
