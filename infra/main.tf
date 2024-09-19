@@ -775,7 +775,7 @@ resource "aws_route53_record" "www" {
   zone_id = data.aws_route53_zone.service.zone_id
 
   alias {
-    name                   = aws_security_group.alb.name
+    name                   = aws_security_group.alb.dns_name
     zone_id                = aws_security_group.alb.zone_id
     evaluate_target_health = true
   }
