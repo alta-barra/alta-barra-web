@@ -648,25 +648,26 @@ resource "aws_security_group" "alb" {
   description = "Security group for ALB"
   vpc_id      = aws_vpc.default.id
 
-  ingress {
-    description = "Allow HTTPS ingress traffic"
-    from_port   = 443
-    to_port     = 0
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # TODO restrict this 
-  }
-
-  egress {
-    description = "Allow all egress traffic"
-    from_port   = 0
-    to_port     = 0
-    protocol    = -1
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   tags = {
     Name = "${var.namespace}_ALB_SecurityGroup_${var.environment}"
   }
+}
+resource "aws_vpc_security_group_ingress_rule" "alb_https_in" {
+  security_group_id = aws_security_group.alb.id
+
+  cidr_ipv4   = var.vpc_cidr_block
+  from_port   = 443
+  ip_protocol = "tcp"
+  to_port     = 443
+}
+
+resource "aws_vpc_security_group_egress_rule" "alb_out" {
+  security_group_id = aws_security_group.alb.id
+
+  cidr_ipv4   = var.vpc_cidr_block
+  from_port   = 0
+  ip_protocol = "tcp"
+  to_port     = 0
 }
 
 resource "aws_security_group" "bastion_host" {
