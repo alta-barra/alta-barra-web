@@ -579,11 +579,15 @@ resource "aws_alb_listener_rule" "https_listener_rule" {
       values = ["/*"]
     }
   }
+
+  tags {
+    Name = "Route traffic to ${var.environment} webapp"
+  }
 }
 
 resource "aws_alb_target_group" "service_target_group" {
   name                 = "${var.namespace}-TG-${var.environment}"
-  port                 = "80"
+  port                 = "4000"
   protocol             = "HTTP"
   vpc_id               = aws_vpc.default.id
   deregistration_delay = 120
