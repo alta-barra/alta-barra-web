@@ -769,45 +769,15 @@ resource "aws_instance" "bastion_host" {
   }
 }
 
-## Point A record to CloudFront distribution
-resource "aws_route53_zone" "environment" {
-  name = "${var.environment}.${var.domain_name}"
-}
-
-resource "aws_route53_record" "environment" {
-  zone_id = data.aws_route53_zone.service.id
-  name    = "${var.environment}.${var.domain_name}"
-  type    = "NS"
-  ttl     = 300
-  records = [
-    aws_route53_zone.environment.name_servers[0],
-    aws_route53_zone.environment.name_servers[1],
-    aws_route53_zone.environment.name_servers[2],
-    aws_route53_zone.environment.name_servers[3]
-  ]
-}
-
-resource "aws_route53_record" "service_record" {
-  name    = "${var.environment}.${var.domain_name}"
-  type    = "A"
-  zone_id = aws_route53_zone.environment.id
-
-  alias {
-    name                   = aws_cloudfront_distribution.default.domain_name
-    zone_id                = aws_cloudfront_distribution.default.hosted_zone_id
-    evaluate_target_health = false
-  }
-}
-
-resource "aws_route53_record" "root_service_record" {
+resource "aws_route53_record" "www" {
   name    = var.domain_name
   type    = "A"
-  zone_id = aws_route53_zone.environment.id
+  zone_id = data.aws_route53_zone.service.zone_id
 
   alias {
-    name                   = aws_cloudfront_distribution.default.domain_name
-    zone_id                = aws_cloudfront_distribution.default.hosted_zone_id
-    evaluate_target_health = false
+    name                   = aws_security_group.alb.name
+    zone_id                = aws_security_group.alb.zone_id
+    evaluate_target_health = true
   }
 }
 
