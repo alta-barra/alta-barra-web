@@ -649,11 +649,11 @@ resource "aws_security_group" "alb" {
   vpc_id      = aws_vpc.default.id
 
   ingress {
-    description     = "Allow HTTPS ingress traffic"
-    from_port       = 443
-    to_port         = 0
-    protocol        = "tcp"
-    security_groups = [aws_security_group.alb.id]
+    description = "Allow HTTPS ingress traffic"
+    from_port   = 443
+    to_port     = 0
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # TODO restrict this 
   }
 
   egress {
