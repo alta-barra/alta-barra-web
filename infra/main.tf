@@ -390,7 +390,7 @@ resource "aws_ecs_task_definition" "default" {
       portMappings = [
         {
           containerPort = var.container_port
-          hostPort      = 0
+          hostPort      = 80
           protocol      = "tcp"
         }
       ]
@@ -587,7 +587,7 @@ resource "aws_alb_listener_rule" "https_listener_rule" {
 
 resource "aws_alb_target_group" "service_target_group" {
   name                 = "${var.namespace}-TG-${var.environment}"
-  port                 = "4000"
+  port                 = "80"
   protocol             = "HTTP"
   vpc_id               = aws_vpc.default.id
   deregistration_delay = 120
