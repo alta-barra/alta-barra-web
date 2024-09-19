@@ -61,7 +61,7 @@ if config_env() == :prod do
   config :altabarra, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
   config :altabarra, AltabarraWeb.Endpoint,
-    url: [host: host, port: 443, scheme: "https"],
+    url: [host: host, port: port, scheme: "http"],
     http: [
       ip: {0, 0, 0, 0, 0, 0, 0, 0},
       port: port
