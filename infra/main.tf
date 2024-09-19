@@ -567,6 +567,7 @@ resource "aws_alb_listener" "alb_default_listener_https" {
 
 resource "aws_alb_listener_rule" "https_listener_rule" {
   listener_arn = aws_alb_listener.alb_default_listener_https.arn
+  priority     = 100
 
   action {
     type             = "forward"
@@ -574,15 +575,8 @@ resource "aws_alb_listener_rule" "https_listener_rule" {
   }
 
   condition {
-    host_header {
-      values = [var.domain_name, "${var.environment}.${var.domain_name}"]
-    }
-  }
-
-  condition {
-    http_header {
-      http_header_name = "X-Custom-Header"
-      values           = [var.custom_origin_host_header]
+    path_pattern {
+      values = ["/*"]
     }
   }
 }
