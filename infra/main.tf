@@ -580,7 +580,7 @@ resource "aws_alb_listener_rule" "https_listener_rule" {
     }
   }
 
-  tags {
+  tags = {
     Name = "Route traffic to ${var.environment} webapp"
   }
 }
