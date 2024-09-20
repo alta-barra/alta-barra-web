@@ -187,7 +187,7 @@ resource "aws_launch_template" "ecs_launch_template" {
   instance_type = var.instance_type
   key_name      = aws_key_pair.default.key_name
 
-  vpc_security_group_ids = [aws_security_group.ec2.id]
+  vpc_security_group_ids = [aws_security_group.ecs_instances.id]
 
   iam_instance_profile {
     arn = aws_iam_instance_profile.ec2_instance_role_profile.arn
@@ -589,16 +589,16 @@ resource "aws_vpc_security_group_ingress_rule" "alb_https_inbound" {
   security_group_id = aws_security_group.alb.id
   from_port         = 443
   to_port           = 443
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
+  ip_protocol       = "tcp"
+  cidr_ipv4         = var.vpc_cidr_block
 }
 
 resource "aws_vpc_security_group_egress_rule" "alb_to_ecs_egress" {
-  security_group_id        = aws_security_group.alb.id
-  from_port                = 1024  # var.container_port
-  to_port                  = 65555 # var.container_port
-  protocol                 = "tcp"
-  source_security_group_id = aws_security_group.ecs_instances.id
+  security_group_id = aws_security_group.alb.id
+  from_port         = 1024
+  to_port           = 65535
+  ip_protocol       = "tcp"
+  cidr_ipv4         = var.vpc_cidr_block
 }
 
 # Security Group for ECS Instances
@@ -613,19 +613,19 @@ resource "aws_security_group" "ecs_instances" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb_ingress" {
-  security_group_id        = aws_security_group.ecs_instances.id
-  from_port                = var.container_port
-  to_port                  = var.container_port
-  protocol                 = "tcp"
-  source_security_group_id = aws_security_group.alb.id
+  security_group_id = aws_security_group.ecs_instances.id
+  from_port         = var.container_port
+  to_port           = var.container_port
+  ip_protocol       = "tcp"
+  cidr_ipv4         = var.vpc_cidr_block
 }
 
 resource "aws_vpc_security_group_egress_rule" "ecs_to_rds_egress" {
-  security_group_id        = aws_security_group.ecs_instances.id
-  from_port                = 5432
-  to_port                  = 5432
-  protocol                 = "tcp"
-  source_security_group_id = aws_security_group.rds.id
+  security_group_id = aws_security_group.ecs_instances.id
+  from_port         = 5432
+  to_port           = 5432
+  ip_protocol       = "tcp"
+  cidr_ipv4         = var.vpc_cidr_block
 }
 
 # Security Group for Bastion
@@ -707,30 +707,28 @@ resource "aws_security_group" "rds" {
   }
 }
 
-resource "aws_security_group_ingress_rule" "rds_from_ecs_ingress" {
+resource "aws_vpc_security_group_ingress_rule" "rds_from_ecs_ingress" {
   security_group_id = aws_security_group.rds.id
   description       = "Allow PostgreSQL access from ECS instances"
 
   from_port   = 5432
   ip_protocol = "tcp"
   to_port     = 5432
-
-  source_security_group_id = aws_security_group.ecs_instances.id
+  cidr_ipv4   = var.vpc_cidr_block
 
   tags = {
     Name = "${var.environment}-SGR-in-ecs-postgres"
   }
 }
 
-resource "aws_security_group_ingress_rule" "rds_from_bastion_ingress" {
+resource "aws_vpc_security_group_ingress_rule" "rds_from_bastion_ingress" {
   security_group_id = aws_security_group.rds.id
   description       = "Allow PostgreSQL access from Bastion host"
 
   from_port   = 5432
   ip_protocol = "tcp"
   to_port     = 5432
-
-  source_security_group_id = aws_security_group.bastion_host.id
+  cidr_ipv4   = var.vpc_cidr_block
 
   tags = {
     Name = "${var.environment}-SGR-in-bastion"
