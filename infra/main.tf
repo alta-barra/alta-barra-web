@@ -574,6 +574,32 @@ resource "aws_alb_target_group" "service_target_group" {
   depends_on = [aws_alb.alb]
 }
 
+# Security Group for ALB
+resource "aws_security_group" "alb" {
+  name        = "${var.namespace}_ALB_SecurityGroup_${var.environment}"
+  description = "Security group for ALB"
+  vpc_id      = aws_vpc.default.id
+
+  tags = {
+    Name = "${var.namespace}_ALB_SecurityGroup_${var.environment}"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "alb_https_inbound" {
+  security_group_id = aws_security_group.alb.id
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+}
+
+resource "aws_vpc_security_group_egress_rule" "alb_to_ecs_egress" {
+  security_group_id        = aws_security_group.alb.id
+  from_port                = 1024  # var.container_port
+  to_port                  = 65555 # var.container_port
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.ecs_instances.id
+}
 
 # Security Group for ECS Instances
 resource "aws_security_group" "ecs_instances" {
@@ -587,70 +613,22 @@ resource "aws_security_group" "ecs_instances" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb_ingress" {
-  security_group_id = aws_security_group.ecs_instances.id
-
-  from_port   = 1024
-  ip_protocol = "tcp"
-  to_port     = 65535
-
-  tags = {
-    Name = "${var.namespace}_tcp_${var.environment}"
-  }
+  security_group_id        = aws_security_group.ecs_instances.id
+  from_port                = var.container_port
+  to_port                  = var.container_port
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.alb.id
 }
 
 resource "aws_vpc_security_group_egress_rule" "ecs_to_rds_egress" {
-  security_group_id = aws_security_group.alb.id
-
-  from_port   = 5432
-  to_port     = 5432
-  ip_protocol = "tcp"
+  security_group_id        = aws_security_group.ecs_instances.id
+  from_port                = 5432
+  to_port                  = 5432
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.rds.id
 }
 
-resource "aws_vpc_security_group_egress_rule" "ecs_out" {
-  security_group_id = aws_security_group.ec2.id
-
-  from_port   = 0
-  ip_protocol = "tcp"
-  to_port     = 0
-}
-
-# Security Group for ALB
-resource "aws_security_group" "alb" {
-  name        = "${var.namespace}_ALB_SecurityGroup_${var.environment}"
-  description = "Security group for ALB"
-  vpc_id      = aws_vpc.default.id
-
-  tags = {
-    Name = "${var.namespace}_ALB_SecurityGroup_${var.environment}"
-  }
-}
-resource "aws_vpc_security_group_ingress_rule" "alb_https" {
-  security_group_id = aws_security_group.alb.id
-
-  cidr_ipv4   = var.vpc_cidr_block
-  from_port   = 443
-  ip_protocol = "tcp"
-  to_port     = 443
-
-  tags = {
-    Name = "${var.environment}-SGR-in-https"
-  }
-}
-
-resource "aws_vpc_security_group_egress_rule" "out" {
-  security_group_id = aws_security_group.alb.id
-  description       = "Allow all egress traffic"
-
-  from_port   = var.container_port
-  ip_protocol = "tcp"
-  to_port     = var.container_port
-
-  tags = {
-    Name = "${var.environment}-SGR-out"
-  }
-}
-
-
+# Security Group for Bastion
 resource "aws_security_group" "bastion_host" {
   name        = "${var.namespace}_SecurityGroup_BastionHost_${var.environment}"
   description = "Bastion host Security Group"
@@ -718,6 +696,7 @@ resource "aws_iam_role_policy" "ecs_task_rds_access" {
   })
 }
 
+# Security Group for RDS
 resource "aws_security_group" "rds" {
   name        = "${var.namespace}_RDS_SecurityGroup_${var.environment}"
   description = "Security group for RDS instance"
@@ -728,44 +707,32 @@ resource "aws_security_group" "rds" {
   }
 }
 
-resource "aws_security_group_ingress_rule" "postgres" {
+resource "aws_security_group_ingress_rule" "rds_from_ecs_ingress" {
   security_group_id = aws_security_group.rds.id
   description       = "Allow PostgreSQL access from ECS instances"
 
-  cidr_ipv4   = var.vpc_cidr_block
   from_port   = 5432
   ip_protocol = "tcp"
   to_port     = 5432
 
+  source_security_group_id = aws_security_group.ecs_instances.id
+
   tags = {
-    Name = "${var.environment}-SGR-in-postgres"
+    Name = "${var.environment}-SGR-in-ecs-postgres"
   }
 }
 
-resource "aws_security_group_ingress_rule" "postgres" {
-  security_group_id = aws_security_group.bastion_host.id
+resource "aws_security_group_ingress_rule" "rds_from_bastion_ingress" {
+  security_group_id = aws_security_group.rds.id
   description       = "Allow PostgreSQL access from Bastion host"
 
-  cidr_ipv4   = var.vpc_cidr_block
   from_port   = 5432
   ip_protocol = "tcp"
   to_port     = 5432
+
+  source_security_group_id = aws_security_group.bastion_host.id
 
   tags = {
     Name = "${var.environment}-SGR-in-bastion"
   }
 }
-
-resource "aws_vpc_security_group_egress_rule" "out" {
-  security_group_id = aws_security_group.alb.id
-  description       = "Allow all egress traffic"
-
-  from_port   = 0
-  ip_protocol = "tcp"
-  to_port     = 0
-
-  tags = {
-    Name = "${var.environment}-SGR-out"
-  }
-}
-
