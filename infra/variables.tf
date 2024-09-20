@@ -157,7 +157,7 @@ variable "target_capacity" {
 variable "container_port" {
   description = "Port of the container"
   type        = number
-  default     = 80
+  default     = 4000
 }
 
 variable "cpu_units" {

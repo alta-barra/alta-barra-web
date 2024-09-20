@@ -288,7 +288,7 @@ resource "aws_ecs_service" "service" {
   load_balancer {
     target_group_arn = aws_alb_target_group.service_target_group.arn
     container_name   = var.service_name
-    container_port   = 80
+    container_port   = var.container_port
   }
 
   ## Spread tasks evenly accross all Availability Zones for High Availability
@@ -378,8 +378,8 @@ resource "aws_ecs_task_definition" "default" {
       ]
       portMappings = [
         {
-          containerPort = 4000 # TODO set via variable
-          hostPort      = 80
+          containerPort = var.container_port
+          hostPort      = 0
           protocol      = "tcp"
         }
       ]
