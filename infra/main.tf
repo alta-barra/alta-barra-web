@@ -550,7 +550,7 @@ resource "aws_alb_listener" "https" {
     target_group_arn = aws_alb_target_group.service_target_group.arn
   }
 
-  depends_on = [aws_acm_certificate.alb_certificate]
+  depends_on = [aws_acm_certificate.cert]
 }
 
 resource "aws_alb_target_group" "service_target_group" {
