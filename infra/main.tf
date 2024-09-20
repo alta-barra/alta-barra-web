@@ -624,6 +624,10 @@ resource "aws_vpc_security_group_ingress_rule" "ec2_bastion_ephemeral_http_in" {
   from_port   = 1024
   ip_protocol = "tcp"
   to_port     = 65535
+
+  tags = {
+    Name = "${var.namespace}_ephemeral_tcp_${var.environment}"
+  }
 }
 
 resource "aws_vpc_security_group_ingress_rule" "ec2_bastion_http_in" {
