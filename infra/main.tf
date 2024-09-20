@@ -565,12 +565,12 @@ resource "aws_alb_listener_rule" "https_listener_rule" {
 
   condition {
     path_pattern {
-      values = ["/*"]
+      values = ["/", "/*"]
     }
   }
 
   tags = {
-    Name = "Route traffic to ${var.environment} webapp"
+    Name = " ${var.environment} Webapp traffic"
   }
 }
 
