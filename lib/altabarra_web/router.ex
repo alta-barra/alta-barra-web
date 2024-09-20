@@ -21,6 +21,7 @@ defmodule AltabarraWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    get "/status", HealthcheckController, :status
   end
 
   # Other scopes may use custom stacks.

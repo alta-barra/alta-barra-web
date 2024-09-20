@@ -226,7 +226,7 @@ variable "custom_origin_host_header" {
 variable "healthcheck_endpoint" {
   description = "Endpoint for ALB healthcheck"
   type        = string
-  default     = "/"
+  default     = "/status"
 }
 
 variable "healthcheck_matcher" {
