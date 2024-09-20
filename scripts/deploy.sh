@@ -33,6 +33,10 @@ REPOSITORY_BASE_URL=$(sed -r 's#([^/])/[^/].*#\1#' <<< ${REPOSITORY_URL})
 aws ecr get-login-password --region us-east-1 | \
     docker login --username AWS --password-stdin ${REPOSITORY_BASE_URL}
 
+# Retrieve the ECS cluster and service name from Terraform output
+ECS_CLUSTER=$(tofu output -raw ecs_cluster_name)
+ECS_SERVICE=$(tofu output -raw ecs_service_name)
+
 # Navigate back to the root directory
 cd ../
 
@@ -44,3 +48,10 @@ docker tag altabarra/${APP_NAME}:latest ${REPOSITORY_URL}:latest
 docker tag altabarra/${APP_NAME}:latest ${REPOSITORY_URL}:${HASH}
 docker push ${REPOSITORY_URL}:latest
 docker push ${REPOSITORY_URL}:${HASH}
+
+## Update ECS Service ========================================================
+# Trigger ECS service update to refresh tasks with the new image
+aws ecs update-service \
+    --cluster ${ECS_CLUSTER} \
+    --service ${ECS_SERVICE} \
+    --force-new-deployment
