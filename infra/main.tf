@@ -616,6 +616,15 @@ resource "aws_vpc_security_group_ingress_rule" "ec2_bastion_ssh_in" {
   to_port     = 22
 }
 
+resource "aws_security_group_egress_rule" "lb_out" {
+  security_group_id = aws_security_group.alb.id
+
+  cidr_ipv4 = var.vpc_cidr_block
+  from_port = var.container_port
+  to_port   = var.container_port
+  protocol  = "tcp"
+}
+
 resource "aws_vpc_security_group_egress_rule" "ec2_out" {
   security_group_id = aws_security_group.ec2.id
 
