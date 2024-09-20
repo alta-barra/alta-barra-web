@@ -580,6 +580,10 @@ resource "aws_security_group" "alb" {
   description = "Security group for ALB"
   vpc_id      = aws_vpc.default.id
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   tags = {
     Name = "${var.namespace}_ALB_SecurityGroup_${var.environment}"
   }
@@ -607,6 +611,10 @@ resource "aws_security_group" "ecs_instances" {
   description = "Security group for EC2 instances in ECS cluster"
   vpc_id      = aws_vpc.default.id
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   tags = {
     Name = "${var.namespace}_EC2_Instance_SecurityGroup_${var.environment}"
   }
@@ -633,6 +641,10 @@ resource "aws_security_group" "bastion_host" {
   name        = "${var.namespace}_SecurityGroup_BastionHost_${var.environment}"
   description = "Bastion host Security Group"
   vpc_id      = aws_vpc.default.id
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   ingress {
     description = "Allow SSH"
@@ -701,6 +713,10 @@ resource "aws_security_group" "rds" {
   name        = "${var.namespace}_RDS_SecurityGroup_${var.environment}"
   description = "Security group for RDS instance"
   vpc_id      = aws_vpc.default.id
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   tags = {
     Name = "${var.namespace}_RDS_SecurityGroup_${var.environment}"
