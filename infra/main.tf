@@ -576,7 +576,7 @@ resource "aws_alb_listener_rule" "https_listener_rule" {
 
 resource "aws_alb_target_group" "service_target_group" {
   name                 = "${var.namespace}-TG-${var.environment}"
-  port                 = "80"
+  port                 = var.container_port
   protocol             = "HTTP"
   vpc_id               = aws_vpc.default.id
   deregistration_delay = 120
