@@ -31,23 +31,38 @@ data "aws_route53_zone" "service" {
   name = var.domain_name
 }
 
-resource "aws_acm_certificate" "alb_certificate" {
+resource "aws_acm_certificate" "cert" {
   domain_name               = var.domain_name
   validation_method         = "DNS"
   subject_alternative_names = ["*.${var.domain_name}"]
+
+  tags = {
+    Name = "${var.namespace}-certificate"
+  }
 }
 
-resource "aws_acm_certificate_validation" "alb_certificate" {
-  certificate_arn         = aws_acm_certificate.alb_certificate.arn
-  validation_record_fqdns = [aws_route53_record.generic_certificate_validation.fqdn]
+resource "aws_route53_record" "cert_validation" {
+  for_each = {
+    for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => {
+      name  = dvo.resource_record_name
+      type  = dvo.resource_record_type
+      value = dvo.resource_record_value
+    }
+  }
+
+  zone_id = aws_route53_zone.primary.zone_id
+  name    = each.value.name
+  type    = each.value.type
+  ttl     = 60
+  records = [each.value.value]
 }
 
-resource "aws_route53_record" "generic_certificate_validation" {
-  name    = tolist(aws_acm_certificate.alb_certificate.domain_validation_options)[0].resource_record_name
-  type    = tolist(aws_acm_certificate.alb_certificate.domain_validation_options)[0].resource_record_type
-  zone_id = data.aws_route53_zone.service.id
-  records = [tolist(aws_acm_certificate.alb_certificate.domain_validation_options)[0].resource_record_value]
-  ttl     = 300
+resource "aws_acm_certificate_validation" "cert_validation" {
+  certificate_arn = aws_acm_certificate.cert.arn
+
+  validation_record_fqdns = [
+    for record in aws_route53_record.cert_validation : record.fqdn
+  ]
 }
 
 module "ecr" {
@@ -523,44 +538,21 @@ resource "aws_alb" "alb" {
   subnets         = aws_subnet.public.*.id
 }
 
-resource "aws_alb_listener" "alb_default_listener_https" {
+resource "aws_alb_listener" "https" {
   load_balancer_arn = aws_alb.alb.arn
   port              = "443"
   protocol          = "HTTPS"
-  certificate_arn   = aws_acm_certificate.alb_certificate.arn
-  ssl_policy        = "ELBSecurityPolicy-TLS-1-2-Ext-2018-06"
+  certificate_arn   = aws_acm_certificate.cert.arn
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
 
   default_action {
-    type = "fixed-response"
-
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "Access denied"
-      status_code  = "403"
+    action {
+      type             = "forward"
+      target_group_arn = aws_alb_target_group.service_target_group.arn
     }
   }
 
   depends_on = [aws_acm_certificate.alb_certificate]
-}
-
-resource "aws_alb_listener_rule" "https_listener_rule" {
-  listener_arn = aws_alb_listener.alb_default_listener_https.arn
-  priority     = 100
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_alb_target_group.service_target_group.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/", "/*"]
-    }
-  }
-
-  tags = {
-    Name = " ${var.environment} Webapp traffic"
-  }
 }
 
 resource "aws_alb_target_group" "service_target_group" {
