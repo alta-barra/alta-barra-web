@@ -27,7 +27,7 @@ data "aws_ami" "amazon_linux_2" {
 }
 
 ## Route53 Hosted Zone  ======================================================
-data "aws_route53_zone" "service" {
+data "aws_route53_zone" "primary" {
   name = var.domain_name
 }
 
@@ -546,10 +546,8 @@ resource "aws_alb_listener" "https" {
   ssl_policy        = "ELBSecurityPolicy-2016-08"
 
   default_action {
-    action {
-      type             = "forward"
-      target_group_arn = aws_alb_target_group.service_target_group.arn
-    }
+    type             = "forward"
+    target_group_arn = aws_alb_target_group.service_target_group.arn
   }
 
   depends_on = [aws_acm_certificate.alb_certificate]
@@ -692,7 +690,7 @@ resource "aws_instance" "bastion_host" {
 resource "aws_route53_record" "www" {
   name    = var.domain_name
   type    = "A"
-  zone_id = data.aws_route53_zone.service.zone_id
+  zone_id = data.aws_route53_zone.primary.zone_id
 
   alias {
     name                   = aws_alb.alb.dns_name
