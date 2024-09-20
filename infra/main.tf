@@ -31,19 +31,6 @@ data "aws_route53_zone" "service" {
   name = var.domain_name
 }
 
-# resource "aws_route53_record" "service" {
-#   zone_id = var.tld_zone_id
-#   name    = var.domain_name
-#   type    = "NS"
-#   ttl     = 300
-#   records = [
-#     data.aws_route53_zone.service.name_servers[0],
-#     data.aws_route53_zone.service.name_servers[1],
-#     data.aws_route53_zone.service.name_servers[2],
-#     data.aws_route53_zone.service.name_servers[3]
-#   ]
-# }
-
 resource "aws_acm_certificate" "alb_certificate" {
   domain_name               = var.domain_name
   validation_method         = "DNS"
@@ -56,14 +43,12 @@ resource "aws_acm_certificate_validation" "alb_certificate" {
 }
 
 resource "aws_acm_certificate" "cloudfront_certificate" {
-  #provider                  = aws.us-east-1
   domain_name               = var.domain_name
   validation_method         = "DNS"
   subject_alternative_names = ["*.${var.domain_name}"]
 }
 
 resource "aws_acm_certificate_validation" "cloudfront_certificate" {
-  #provider                = aws.us_east_1
   certificate_arn         = aws_acm_certificate.cloudfront_certificate.arn
   validation_record_fqdns = [aws_route53_record.generic_certificate_validation.fqdn]
 }
@@ -206,6 +191,10 @@ resource "aws_launch_template" "ecs_launch_template" {
 
   monitoring {
     enabled = true
+  }
+
+  metadata_options {
+    http_tokens = "required" # IMDSv2 alias
   }
 
   user_data = base64encode(templatefile("./modules/ecs/user_data.sh", { ecs_cluster_name : aws_ecs_cluster.default.name }))
