@@ -138,7 +138,7 @@ variable "memory_target_tracking_desired_value" {
 
 variable "maximum_scaling_step_size" {
   description = "Maximum amount of EC2 instances that should be added on scale-out"
-  default     = 5
+  default     = 3
   type        = number
 }
 
