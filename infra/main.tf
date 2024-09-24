@@ -621,10 +621,12 @@ resource "aws_security_group" "ecs_instances" {
 
 resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb_ingress" {
   security_group_id = aws_security_group.ecs_instances.id
-  from_port         = var.container_port
-  to_port           = var.container_port
-  ip_protocol       = "tcp"
-  cidr_ipv4         = var.vpc_cidr_block
+  # from_port         = var.container_port
+  # to_port           = var.container_port
+  from_port   = 1024
+  to_port     = 65535
+  ip_protocol = "tcp"
+  cidr_ipv4   = var.vpc_cidr_block
 }
 
 resource "aws_vpc_security_group_egress_rule" "ecs_to_rds_egress" {
