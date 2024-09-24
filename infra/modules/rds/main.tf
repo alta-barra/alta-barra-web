@@ -1,11 +1,3 @@
-data "aws_secretsmanager_secret" "password" {
-  name = var.db_password_secret
-}
-
-data "aws_secretsmanager_secret_version" "latest" {
-  secret_id = data.aws_secretsmanager_secret.password.id
-}
-
 resource "aws_db_instance" "this" {
   allocated_storage       = var.allocated_storage
   db_name                 = var.db_name
@@ -14,7 +6,7 @@ resource "aws_db_instance" "this" {
   identifier              = var.db_identifier
   instance_class          = var.instance_class
   username                = var.db_username
-  password                = data.aws_secretsmanager_secret_version.latest.secret_string
+  password                = var.db_password
   parameter_group_name    = "default.${var.db_engine}${split(".", var.db_engine_version)[0]}"
   skip_final_snapshot     = true
   apply_immediately       = true

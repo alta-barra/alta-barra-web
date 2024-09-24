@@ -11,7 +11,7 @@ resource "aws_secretsmanager_secret" "this" {
   recovery_window_in_days = 14
 
   tags = {
-    Name = "terraform_aws_rds_secrets_manager"
+    Name = "${var.namespace}_terraform_aws_rds_secrets_manager_${var.environment}"
   }
 }
 

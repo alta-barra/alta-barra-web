@@ -44,6 +44,7 @@ RUN mkdir config
 # to ensure any relevant config change will trigger the dependencies
 # to be re-compiled.
 COPY config/config.exs config/${MIX_ENV}.exs config/
+COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN mkdir -p /etc/ssl/certs \
     && curl https://truststore.pki.rds.amazonaws.com/us-east-1/us-east-1-bundle.pem \
     -o /etc/ssl/certs/rds-combined-ca-bundle.pem
@@ -95,6 +96,7 @@ ENV ERL_FLAGS="+JPperf true"
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/altabarra ./
 RUN mkdir -p /etc/ssl/certs
 COPY --from=builder --chown=nobody:root /etc/ssl/certs/rds-combined-ca-bundle.pem /etc/ssl/certs/rds-combined-ca-bundle.pem
+COPY --from=builder --chown=nobody:root /usr/local/bin/entrypoint.sh
 
 USER nobody
 
@@ -103,4 +105,5 @@ USER nobody
 # above and adding an entrypoint. See https://github.com/krallin/tini for details
 # ENTRYPOINT ["/tini", "--"]
 
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/app/bin/server"]

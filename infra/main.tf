@@ -240,14 +240,13 @@ module "kms" {
   namespace = var.namespace
 }
 
-locals {
-  db_password_secret = "${var.namespace}/xdb_password"
-}
-
 module "secrets_manager" {
   source      = "./modules/secrets_manager/"
-  secret_name = local.db_password_secret
+  secret_name = "${var.namespace}/${var.environment}/db_password"
   kms_key_id  = module.kms.key_id
+  description = "Password for RDS"
+  environment = var.environment
+  namespace   = var.namespace
 }
 
 ## RDS =======================================================================
@@ -255,14 +254,14 @@ resource "aws_db_subnet_group" "default" {
   subnet_ids = aws_subnet.private.*.id
 
   tags = {
-    Name = "Terraform managed DB subnet group"
+    Name = "${var.namespace}_db_subnet_group_${var.environment}"
   }
 }
 
 module "rds" {
   source = "./modules/rds"
 
-  db_password_secret     = local.db_password_secret
+  db_password            = module.secrets_manager.secret_string
   db_subnet_group_name   = aws_db_subnet_group.default.name
   vpc_security_group_ids = [aws_security_group.rds.id]
 }
@@ -311,6 +310,8 @@ resource "aws_ecs_service" "service" {
   lifecycle {
     ignore_changes = [desired_count]
   }
+
+  depends_on = [aws_alb_listener.https]
 }
 
 resource "aws_iam_role" "ecs_service_role" {
@@ -370,16 +371,31 @@ resource "aws_ecs_task_definition" "default" {
       cpu       = var.cpu_units
       memory    = var.memory
       essential = true
-      environment = [
+      secrets = [
         {
-          "name" : "SECRET_KEY_BASE",
-          "value" : var.secret_key_base
-        },
-        {
-          "name" : "DATABASE_URL",
-          "value" : "ecto://altabarra:${module.rds.db_password}@${module.rds.db_endpoint}/${module.rds.db_name}"
+          name      = "DB_PASSWORD",
+          valueFrom = module.secrets_manager.secret_arn
         }
       ]
+      environment = [
+        {
+          name  = "SECRET_KEY_BASE",
+          value = var.secret_key_base
+        },
+        {
+          name  = "DB_USER",
+          value = "altabarra"
+        },
+        {
+          name  = "DB_HOST",
+          value = module.rds.db_endpoint
+        },
+        {
+          name  = "DB_NAME",
+          value = module.rds.db_name
+        }
+      ]
+
       portMappings = [
         {
           containerPort = var.container_port

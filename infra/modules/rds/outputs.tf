@@ -22,8 +22,3 @@ output "db_name" {
   description = "The name of the database"
   value       = aws_db_instance.this.db_name
 }
-
-output "db_password" {
-  value     = data.aws_secretsmanager_secret_version.latest.secret_string
-  sensitive = true
-}

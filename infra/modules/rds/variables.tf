@@ -1,6 +1,7 @@
-variable "db_password_secret" {
+variable "db_password" {
   type        = string
   description = "Secret name for database credentials"
+  sensitive   = true
 }
 
 variable "db_username" {
