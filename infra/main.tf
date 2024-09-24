@@ -290,11 +290,6 @@ resource "aws_ecs_service" "service" {
     field = "memory"
   }
 
-  ## Do not update desired count again to avoid a reset to this number on every deployment
-  lifecycle {
-    ignore_changes = [desired_count]
-  }
-
   depends_on = [aws_alb_listener.https]
 }
 
