@@ -7,6 +7,9 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+## Handle Inputs ============================================================
+TARGET_ENV=${1:-prod}
+
 ## Deploy Infrastructure  ====================================================
 # Generate a random hash
 HASH=$(openssl rand -hex 12)
@@ -20,7 +23,7 @@ tofu init
 # Generate the OpenTofu plan file
 tofu plan \
      -var "hash=${HASH}" \
-     -var-file="environments/prod/terraform.tfvars" \
+     -var-file="environments/${TARGET_ENV}/terraform.tfvars" \
      -out=infrastructure.tf.plan
 
 # Provision resources

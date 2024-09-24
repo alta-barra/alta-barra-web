@@ -377,6 +377,10 @@ resource "aws_ecs_task_definition" "default" {
         {
           name  = "DB_NAME",
           value = module.rds.db_name
+        },
+        {
+          name  = "DATABASE_URL",
+          value = "ecto://altabarra:${module.secrets_manager.secret_string}@${module.rds.db_endpoint}/${module.rds.db_name}"
         }
       ]
 
