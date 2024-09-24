@@ -9,6 +9,7 @@ command_exists() {
 
 ## Handle Inputs ============================================================
 TARGET_ENV=${1:-prod}
+APP_NAME=${2:-webapp}
 
 ## Deploy Infrastructure  ====================================================
 # Generate a random hash
@@ -45,7 +46,6 @@ cd ../
 
 ## Deploy Application ========================================================
 # Build Docker image and tag new versions for every deployment
-APP_NAME=${1:-webapp}
 docker build --platform linux/amd64 -t altabarra/${APP_NAME} .
 docker tag altabarra/${APP_NAME}:latest ${REPOSITORY_URL}:latest
 docker tag altabarra/${APP_NAME}:latest ${REPOSITORY_URL}:${HASH}
@@ -55,8 +55,7 @@ docker push ${REPOSITORY_URL}:${HASH}
 ## Update ECS Service ========================================================
 # Trigger ECS service update to refresh tasks with the new image
 
-# DEBUG disabling
-# aws ecs update-service \
-#     --cluster ${ECS_CLUSTER} \
-#     --service ${ECS_SERVICE} \
-#     --force-new-deployment
+aws ecs update-service \
+    --cluster ${ECS_CLUSTER} \
+    --service ${ECS_SERVICE} \
+    --force-new-deployment
