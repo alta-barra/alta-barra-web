@@ -87,7 +87,7 @@ variable "public_ec2_key" {
 
 variable "instance_type" {
   description = "Instance type for EC2"
-  default     = "t2.micro"
+  default     = "t3.micro"
   type        = string
 }
 

@@ -182,7 +182,7 @@ resource "aws_ecs_cluster" "this" {
 resource "aws_launch_template" "ecs" {
   image_id      = data.aws_ami.amazon_linux_2.id
   name_prefix   = "ecs-${var.name}"
-  instance_type = "t2.micro"
+  instance_type = var.instance_type
 
   iam_instance_profile {
     name = aws_iam_instance_profile.ec2_profile.name
