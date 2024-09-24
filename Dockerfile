@@ -96,7 +96,7 @@ ENV ERL_FLAGS="+JPperf true"
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/altabarra ./
 RUN mkdir -p /etc/ssl/certs
 COPY --from=builder --chown=nobody:root /etc/ssl/certs/rds-combined-ca-bundle.pem /etc/ssl/certs/rds-combined-ca-bundle.pem
-COPY --from=builder --chown=nobody:root /usr/local/bin/entrypoint.sh
+COPY --from=builder --chown=nobody:root /usr/local/bin/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 USER nobody
 
