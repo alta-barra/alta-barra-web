@@ -54,7 +54,9 @@ docker push ${REPOSITORY_URL}:${HASH}
 
 ## Update ECS Service ========================================================
 # Trigger ECS service update to refresh tasks with the new image
-aws ecs update-service \
-    --cluster ${ECS_CLUSTER} \
-    --service ${ECS_SERVICE} \
-    --force-new-deployment
+
+# DEBUG disabling
+# aws ecs update-service \
+#     --cluster ${ECS_CLUSTER} \
+#     --service ${ECS_SERVICE} \
+#     --force-new-deployment
