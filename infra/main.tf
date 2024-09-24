@@ -752,17 +752,3 @@ resource "aws_vpc_security_group_ingress_rule" "rds_from_ecs_ingress" {
     Name = "${var.environment}-SGR-in-ecs-postgres"
   }
 }
-
-resource "aws_vpc_security_group_ingress_rule" "rds_from_bastion_ingress" {
-  security_group_id = aws_security_group.rds.id
-  description       = "Allow PostgreSQL access from Bastion host"
-
-  from_port   = 5432
-  ip_protocol = "tcp"
-  to_port     = 5432
-  cidr_ipv4   = var.vpc_cidr_block
-
-  tags = {
-    Name = "${var.environment}-SGR-in-bastion"
-  }
-}
