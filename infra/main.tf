@@ -41,14 +41,6 @@ resource "aws_acm_certificate" "cert" {
   }
 }
 
-# resource "aws_acm_certificate_validation" "cert_validation" {
-#   certificate_arn = aws_acm_certificate.cert.arn
-
-#   validation_record_fqdns = [
-#     for record in aws_route53_record.cert_validation : record.fqdn
-#   ]
-# }
-
 module "ecr" {
   source      = "./modules/ecr"
   repo_name   = "${lower(var.namespace)}/${var.service_name}"
@@ -181,9 +173,9 @@ resource "aws_launch_template" "ecs_launch_template" {
     enabled = true
   }
 
-  metadata_options {
-    http_tokens = "required"
-  }
+  # metadata_options {
+  #   http_tokens = "required"
+  # }
 
   user_data = base64encode(templatefile("./modules/ecs/user_data.sh", { ecs_cluster_name : aws_ecs_cluster.default.name }))
 }
