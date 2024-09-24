@@ -182,7 +182,7 @@ resource "aws_launch_template" "ecs_launch_template" {
   }
 
   metadata_options {
-    http_tokens = "required" # IMDSv2 alias
+    http_tokens = "required"
   }
 
   user_data = base64encode(templatefile("./modules/ecs/user_data.sh", { ecs_cluster_name : aws_ecs_cluster.default.name }))
@@ -350,12 +350,12 @@ resource "aws_ecs_task_definition" "default" {
       cpu       = var.cpu_units
       memory    = var.memory
       essential = true
-      secrets = [
-        {
-          name      = "DB_PASSWORD",
-          valueFrom = module.secrets_manager.secret_arn
-        }
-      ]
+      # secrets = [
+      #   {
+      #     name      = "DB_PASSWORD",
+      #     valueFrom = module.secrets_manager.secret_arn
+      #   }
+      # ]
       environment = [
         {
           name  = "SECRET_KEY_BASE",
@@ -621,12 +621,10 @@ resource "aws_security_group" "ecs_instances" {
 
 resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb_ingress" {
   security_group_id = aws_security_group.ecs_instances.id
-  # from_port         = var.container_port
-  # to_port           = var.container_port
-  from_port   = 1024
-  to_port     = 65535
-  ip_protocol = "tcp"
-  cidr_ipv4   = var.vpc_cidr_block
+  from_port         = 1024
+  to_port           = 65535
+  ip_protocol       = "tcp"
+  cidr_ipv4         = var.vpc_cidr_block
 }
 
 resource "aws_vpc_security_group_egress_rule" "ecs_to_rds_egress" {
