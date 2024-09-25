@@ -113,14 +113,14 @@ variable "ecs_task_max_count" {
 }
 
 variable "ecs_task_deployment_minimum_healthy_percent" {
-  description = "How many percent of a service must be running to still execute a safe deployment"
-  default     = 50
+  description = "How many percent of a service must be running to still execute a safe deployment ()"
+  default     = 100
   type        = number
 }
 
 variable "ecs_task_deployment_maximum_percent" {
-  description = "How many additional tasks are allowed to run (in percent) while a deployment is executed"
-  default     = 100
+  description = "How many additional tasks are allowed to run (in percent) while a deployment is executed (100% vs 200%)"
+  default     = 200
   type        = number
 }
 
