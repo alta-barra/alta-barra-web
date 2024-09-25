@@ -554,7 +554,7 @@ resource "aws_alb_listener" "https" {
     target_group_arn = aws_alb_target_group.service_target_group.arn
   }
 
-  depends_on = [aws_acm_certificate.cert]
+  depends_on = [aws_acm_certificate.cert, aws_acm_certificate_validation.cert_validation]
 }
 
 resource "aws_alb_listener" "http_redirect_to_https" {
