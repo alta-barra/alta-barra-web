@@ -173,9 +173,9 @@ resource "aws_launch_template" "ecs_launch_template" {
     enabled = true
   }
 
-  # metadata_options {
-  #   http_tokens = "required"
-  # }
+  metadata_options {
+    http_tokens = "required"
+  }
 
   user_data = base64encode(templatefile("./modules/ecs/user_data.sh", { ecs_cluster_name : aws_ecs_cluster.default.name }))
 }
@@ -655,6 +655,7 @@ resource "aws_security_group" "bastion_host" {
 }
 
 resource "aws_instance" "bastion_host" {
+  count                       = 0
   ami                         = data.aws_ami.amazon_linux_2.id
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.public[0].id
