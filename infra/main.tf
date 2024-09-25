@@ -614,7 +614,7 @@ resource "aws_vpc_security_group_ingress_rule" "alb_http_inbound" {
   from_port         = 80
   to_port           = 80
   ip_protocol       = "tcp"
-  cidr_ipv4         = var.vpc_cidr_block
+  cidr_ipv4         = ["0.0.0.0/0"] # Public access
 }
 
 resource "aws_vpc_security_group_ingress_rule" "alb_https_inbound" {
@@ -622,7 +622,7 @@ resource "aws_vpc_security_group_ingress_rule" "alb_https_inbound" {
   from_port         = 443
   to_port           = 443
   ip_protocol       = "tcp"
-  cidr_ipv4         = var.vpc_cidr_block
+  cidr_ipv4         = ["0.0.0.0/0"] # Public access
 }
 
 resource "aws_vpc_security_group_egress_rule" "alb_to_ecs_egress" {
@@ -631,6 +631,14 @@ resource "aws_vpc_security_group_egress_rule" "alb_to_ecs_egress" {
   to_port           = 65535
   ip_protocol       = "tcp"
   cidr_ipv4         = var.vpc_cidr_block
+}
+
+resource "aws_vpc_security_group_egress_rule" "alb_to_ecs_http_egress" {
+  security_group_id = aws_security_group.alb.id
+  from_port         = 0
+  to_port           = 0
+  ip_protocol       = "-1"
+  cidr_ipv4         = ["0.0.0.0/0"]
 }
 
 # Security Group for ECS Instances
