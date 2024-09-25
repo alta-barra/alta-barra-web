@@ -617,14 +617,34 @@ resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb_ingress" {
   to_port           = 65535
   ip_protocol       = "tcp"
   cidr_ipv4         = var.vpc_cidr_block
+
+  tags = {
+    Name = "${var.environment}-SGR-ecs-alb-ingress"
+  }
 }
 
-resource "aws_vpc_security_group_egress_rule" "ecs_to_rds_egress" {
+resource "aws_vpc_security_group_ingress_rule" "ecs_ssh_ingress" {
   security_group_id = aws_security_group.ecs_instances.id
-  from_port         = 5432
-  to_port           = 5432
+  from_port         = 22
+  to_port           = 22
   ip_protocol       = "tcp"
   cidr_ipv4         = var.vpc_cidr_block
+
+  tags = {
+    Name = "${var.environment}-SGR-ecs-ssh-ingress"
+  }
+}
+
+resource "aws_vpc_security_group_egress_rule" "ecs_egress" {
+  security_group_id = aws_security_group.ecs_instances.id
+  from_port         = 0
+  to_port           = 0
+  ip_protocol       = "tcp"
+  cidr_ipv4         = var.vpc_cidr_block
+
+  tags = {
+    Name = "${var.environment}-SGR-ecs-egress"
+  }
 }
 
 # Security Group for Bastion
@@ -725,6 +745,6 @@ resource "aws_vpc_security_group_ingress_rule" "rds_from_ecs_ingress" {
   cidr_ipv4   = var.vpc_cidr_block
 
   tags = {
-    Name = "${var.environment}-SGR-in-ecs-postgres"
+    Name = "${var.environment}-SGR-rds-from-ecs-ingress"
   }
 }
