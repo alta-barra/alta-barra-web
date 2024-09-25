@@ -337,7 +337,8 @@ data "aws_iam_policy_document" "ecs_service_role_policy" {
       "logs:CreateLogStream",
       "logs:DescribeLogStreams",
       "logs:PutSubscriptionFilter",
-      "logs:PutLogEvents"
+      "logs:PutLogEvents",
+      "secretsmanager:GetSecretValue"
     ]
     resources = ["*"]
   }
