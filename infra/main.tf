@@ -41,6 +41,11 @@ resource "aws_acm_certificate" "cert" {
   }
 }
 
+resource "aws_acm_certificate_validation" "alb_certificate" {
+  certificate_arn         = aws_acm_certificate.cert.arn
+  validation_record_fqdns = [aws_route53_record.generic_certificate_validation.fqdn]
+}
+
 module "ecr" {
   source      = "./modules/ecr"
   repo_name   = "${lower(var.namespace)}/${var.service_name}"
