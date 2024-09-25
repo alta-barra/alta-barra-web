@@ -668,7 +668,7 @@ resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb_ingress" {
   }
 }
 
-resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb_ingress" {
+resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb_http_ingress" {
   security_group_id = aws_security_group.ecs_instances.id
   from_port         = 80
   to_port           = 80
@@ -680,7 +680,7 @@ resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb_ingress" {
   }
 }
 
-resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb_ingress" {
+resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb_https_ingress" {
   security_group_id = aws_security_group.ecs_instances.id
   from_port         = 443
   to_port           = 443
