@@ -544,6 +544,22 @@ resource "aws_alb_listener" "https" {
   depends_on = [aws_acm_certificate.cert]
 }
 
+resource "aws_alb_listener" "http_redirect_to_https" {
+  load_balancer_arn = aws_alb.alb.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
 resource "aws_alb_target_group" "service_target_group" {
   name                 = "${var.namespace}-TG-${var.environment}"
   port                 = var.container_port
