@@ -6,15 +6,25 @@ const fs = require("fs")
 const path = require("path")
 
 module.exports = {
+  darkMode: 'media',
   content: [
     "./js/**/*.js",
     "../lib/altabarra_web.ex",
     "../lib/altabarra_web/**/*.*ex"
   ],
   theme: {
+    screens: {
+      sm: '480px',
+      md: '768px',
+      lg: '976px',
+      xl: '1440px'
+    },
     extend: {
       colors: {
         brand: "#FD4F00",
+      },
+      fontFamily: {
+        sans: ['Bai Jamjuree', 'sans-serif']
       }
     },
   },
