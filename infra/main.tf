@@ -186,9 +186,9 @@ resource "aws_launch_template" "ecs_launch_template" {
     enabled = true
   }
 
-  metadata_options {
-    http_tokens = "required"
-  }
+  # metadata_options {
+  #   http_tokens = "required"
+  # }
 
   user_data = base64encode(templatefile("./modules/ecs/user_data.sh", { ecs_cluster_name = aws_ecs_cluster.default.name }))
 }
