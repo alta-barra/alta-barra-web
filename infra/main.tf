@@ -635,8 +635,6 @@ resource "aws_vpc_security_group_egress_rule" "alb_to_ecs_egress" {
 
 resource "aws_vpc_security_group_egress_rule" "alb_to_ecs_http_egress" {
   security_group_id = aws_security_group.alb.id
-  from_port         = 0
-  to_port           = 0
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
 }
@@ -706,8 +704,6 @@ resource "aws_vpc_security_group_ingress_rule" "ecs_ssh_ingress" {
 
 resource "aws_vpc_security_group_egress_rule" "ecs_egress" {
   security_group_id = aws_security_group.ecs_instances.id
-  from_port         = 0
-  to_port           = 0
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
 
