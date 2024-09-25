@@ -48,7 +48,7 @@ module "ecr" {
 }
 
 ## Networking ================================================================
-resource "aws_vpc" "default" {
+resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr_block
   enable_dns_hostnames = true
   enable_dns_support   = true
@@ -68,9 +68,9 @@ resource "aws_internet_gateway" "default" {
 
 resource "aws_subnet" "public" {
   count                   = var.az_count
+  vpc_id                  = aws_vpc.main.id
   cidr_block              = cidrsubnet(var.vpc_cidr_block, 8, var.az_count + count.index)
   availability_zone       = data.aws_availability_zones.available.names[count.index]
-  vpc_id                  = aws_vpc.default.id
   map_public_ip_on_launch = true
 
   tags = {
@@ -79,7 +79,7 @@ resource "aws_subnet" "public" {
 }
 
 resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.default.id
+  vpc_id = aws_vpc.main.id
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -98,7 +98,7 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_main_route_table_association" "public_main" {
-  vpc_id         = aws_vpc.default.id
+  vpc_id         = aws_vpc.main.id
   route_table_id = aws_route_table.public.id
 }
 
@@ -123,9 +123,9 @@ resource "aws_nat_gateway" "nat_gateway" {
 
 resource "aws_subnet" "private" {
   count             = var.az_count
+  vpc_id            = aws_vpc.main.id
   cidr_block        = cidrsubnet(var.vpc_cidr_block, 8, count.index)
   availability_zone = data.aws_availability_zones.available.names[count.index]
-  vpc_id            = aws_vpc.default.id
 
   tags = {
     Name = "${var.namespace}_PrivateSubnet_${count.index}_${var.environment}"
@@ -134,7 +134,7 @@ resource "aws_subnet" "private" {
 
 resource "aws_route_table" "private" {
   count  = var.az_count
-  vpc_id = aws_vpc.default.id
+  vpc_id = aws_vpc.main.id
 
   route {
     cidr_block     = "0.0.0.0/0"
@@ -177,7 +177,7 @@ resource "aws_launch_template" "ecs_launch_template" {
     http_tokens = "required"
   }
 
-  user_data = base64encode(templatefile("./modules/ecs/user_data.sh", { ecs_cluster_name : aws_ecs_cluster.default.name }))
+  user_data = base64encode(templatefile("./modules/ecs/user_data.sh", { ecs_cluster_name = aws_ecs_cluster.default.name }))
 }
 
 resource "aws_iam_role" "ec2_instance_role" {
@@ -342,12 +342,12 @@ resource "aws_ecs_task_definition" "default" {
       cpu       = var.cpu_units
       memory    = var.memory
       essential = true
-      # secrets = [
-      #   {
-      #     name      = "DB_PASSWORD",
-      #     valueFrom = module.secrets_manager.secret_arn
-      #   }
-      # ]
+      secrets = [
+        {
+          name      = "DB_PASSWORD",
+          valueFrom = module.secrets_manager.secret_arn
+        }
+      ]
       environment = [
         {
           name  = "SECRET_KEY_BASE",
@@ -548,7 +548,7 @@ resource "aws_alb_target_group" "service_target_group" {
   name                 = "${var.namespace}-TG-${var.environment}"
   port                 = var.container_port
   protocol             = "HTTP"
-  vpc_id               = aws_vpc.default.id
+  vpc_id               = aws_vpc.main.id
   deregistration_delay = 120
 
   health_check {
@@ -569,7 +569,7 @@ resource "aws_alb_target_group" "service_target_group" {
 resource "aws_security_group" "alb" {
   name        = "${var.namespace}_ALB_SecurityGroup_${var.environment}"
   description = "Security group for ALB"
-  vpc_id      = aws_vpc.default.id
+  vpc_id      = aws_vpc.main.id
 
   lifecycle {
     create_before_destroy = true
@@ -600,7 +600,7 @@ resource "aws_vpc_security_group_egress_rule" "alb_to_ecs_egress" {
 resource "aws_security_group" "ecs_instances" {
   name        = "${var.namespace}_ECS_Instance_SecurityGroup_${var.environment}"
   description = "Security group for EC2 instances in ECS cluster"
-  vpc_id      = aws_vpc.default.id
+  vpc_id      = aws_vpc.main.id
 
   lifecycle {
     create_before_destroy = true
@@ -651,7 +651,7 @@ resource "aws_vpc_security_group_egress_rule" "ecs_egress" {
 resource "aws_security_group" "bastion_host" {
   name        = "${var.namespace}_SecurityGroup_BastionHost_${var.environment}"
   description = "Bastion host Security Group"
-  vpc_id      = aws_vpc.default.id
+  vpc_id      = aws_vpc.main.id
 
   lifecycle {
     create_before_destroy = true
@@ -724,7 +724,7 @@ resource "aws_iam_role_policy" "ecs_task_rds_access" {
 resource "aws_security_group" "rds" {
   name        = "${var.namespace}_RDS_SecurityGroup_${var.environment}"
   description = "Security group for RDS instance"
-  vpc_id      = aws_vpc.default.id
+  vpc_id      = aws_vpc.main.id
 
   lifecycle {
     create_before_destroy = true
