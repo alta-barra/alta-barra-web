@@ -310,7 +310,7 @@ data "aws_iam_policy_document" "ecs_service_policy" {
 
     principals {
       type        = "Service"
-      identifiers = ["ecs.amazonaws.com", ]
+      identifiers = ["ecs.amazonaws.com"]
     }
   }
 }
@@ -337,8 +337,7 @@ data "aws_iam_policy_document" "ecs_service_role_policy" {
       "logs:CreateLogStream",
       "logs:DescribeLogStreams",
       "logs:PutSubscriptionFilter",
-      "logs:PutLogEvents",
-      "secretsmanager:GetSecretValue"
+      "logs:PutLogEvents"
     ]
     resources = ["*"]
   }
@@ -412,6 +411,19 @@ resource "aws_cloudwatch_log_group" "log_group" {
 resource "aws_iam_role" "ecs_task_execution_role" {
   name               = "${var.namespace}_ECS_TaskExecutionRole_${var.environment}"
   assume_role_policy = data.aws_iam_policy_document.task_assume_role_policy.json
+}
+
+data "aws_iam_policy_document" "read_secrets_policy" {
+  statement {
+    effect    = "Allow"
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = ["*"] # TODO restrict to the current secret
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy_attachment" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = data.aws_iam_policy_document.read_secrets_policy.json
 }
 
 data "aws_iam_policy_document" "task_assume_role_policy" {

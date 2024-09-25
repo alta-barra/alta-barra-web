@@ -12,6 +12,8 @@ TARGET_ENV=${1:-prod}
 APP_NAME=${2:-webapp}
 
 ## Deploy Infrastructure  ====================================================
+echo "STAGE: Infrastructure Deployment"
+
 # Generate a random hash
 HASH=$(openssl rand -hex 12)
 
@@ -45,6 +47,8 @@ ECS_SERVICE=$(tofu output -raw ecs_service_name)
 cd ../
 
 ## Deploy Application ========================================================
+echo "STAGE: Application image deployment"
+
 # Build Docker image and tag new versions for every deployment
 docker build --platform linux/amd64 -t altabarra/${APP_NAME} .
 docker tag altabarra/${APP_NAME}:latest ${REPOSITORY_URL}:latest
@@ -53,9 +57,12 @@ docker push ${REPOSITORY_URL}:latest
 docker push ${REPOSITORY_URL}:${HASH}
 
 ## Update ECS Service ========================================================
-# Trigger ECS service update to refresh tasks with the new image
+echo "STAGE: ECS cluster update"
 
+# Trigger ECS service update to refresh tasks with the new image
 aws ecs update-service \
     --cluster ${ECS_CLUSTER} \
     --service ${ECS_SERVICE} \
     --force-new-deployment
+
+echo "Deployment [${HASH}] Completed"
