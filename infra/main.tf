@@ -419,6 +419,12 @@ data "aws_iam_policy_document" "read_secrets_policy" {
     actions   = ["secretsmanager:GetSecretValue"]
     resources = [module.secrets_manager.secret_arn]
   }
+
+  statement {
+    effect    = "Allow"
+    actions   = ["kms:Decrypt"]
+    resources = [module.kms.key_arn]
+  }
 }
 
 resource "aws_iam_policy" "read_secrets_policy" {
