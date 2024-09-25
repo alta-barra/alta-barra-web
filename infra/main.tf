@@ -417,7 +417,7 @@ data "aws_iam_policy_document" "read_secrets_policy" {
   statement {
     effect    = "Allow"
     actions   = ["secretsmanager:GetSecretValue"]
-    resources = ["*"] # TODO restrict to the current secret
+    resources = [module.secrets_manager.secret_arn]
   }
 }
 
