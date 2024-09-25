@@ -41,9 +41,17 @@ resource "aws_acm_certificate" "cert" {
   }
 }
 
-resource "aws_acm_certificate_validation" "alb_certificate" {
+resource "aws_acm_certificate_validation" "cert_validation" {
   certificate_arn         = aws_acm_certificate.cert.arn
   validation_record_fqdns = [aws_route53_record.generic_certificate_validation.fqdn]
+}
+
+resource "aws_route53_record" "generic_certificate_validation" {
+  name    = tolist(aws_acm_certificate.cert.domain_validation_options)[0].resource_record_name
+  type    = tolist(aws_acm_certificate.cert.domain_validation_options)[0].resource_record_type
+  zone_id = aws_route53_zone.primary.id
+  records = [tolist(aws_acm_certificate.cert.domain_validation_options)[0].resource_record_value]
+  ttl     = 300
 }
 
 module "ecr" {
