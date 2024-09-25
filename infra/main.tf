@@ -609,6 +609,14 @@ resource "aws_security_group" "alb" {
   }
 }
 
+resource "aws_vpc_security_group_ingress_rule" "alb_http_inbound" {
+  security_group_id = aws_security_group.alb.id
+  from_port         = 80
+  to_port           = 80
+  ip_protocol       = "tcp"
+  cidr_ipv4         = var.vpc_cidr_block
+}
+
 resource "aws_vpc_security_group_ingress_rule" "alb_https_inbound" {
   security_group_id = aws_security_group.alb.id
   from_port         = 443
