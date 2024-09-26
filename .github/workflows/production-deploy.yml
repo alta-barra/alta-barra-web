@@ -39,7 +39,7 @@ jobs:
         run: |
           echo "ECS_CLUSTER=$(tofu output -raw ecs_cluster_name)" >> $GITHUB_OUTPUT
           echo "ECS_SERVICE=$(tofu output -raw ecs_service_name)" >> $GITHUB_OUTPUT
-          echo "SUBNET_IDS=$(tofu output -json private_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
+          echo "SUBNET_IDS=$(tofu output -json private_subnet_ids | jq -r '[.[]] | join(\",\")')" >> $GITHUB_OUTPUT
           echo "ECS_SECURITY_GROUP_ID=$(tofu output -raw ecs_security_group_id)" >> $GITHUB_OUTPUT
       - name: Run Migrations
         run: |
