@@ -101,4 +101,4 @@ USER nobody
 # above and adding an entrypoint. See https://github.com/krallin/tini for details
 # ENTRYPOINT ["/tini", "--"]
 
-CMD ["sh", "-c", "/app/bin/migrate && exec PHX_SERVER=true /app/bin/server"]
+CMD ["/app/bin/server"]
