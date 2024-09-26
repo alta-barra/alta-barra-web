@@ -855,6 +855,10 @@ resource "aws_ecs_task_definition" "migration_task" {
       command = ["/app/bin/migrate"]
       environment = [
         {
+          name  = "SECRET_KEY_BASE",
+          value = var.secret_key_base
+        },
+        {
           name  = "DATABASE_URL",
           value = "ecto://altabarra:${module.secrets_manager.secret_string}@${module.rds.db_endpoint}/${module.rds.db_name}"
         }
