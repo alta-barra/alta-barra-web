@@ -24,12 +24,34 @@ jobs:
           role-to-assume: ${{ vars.AWS_GITHUB_ROLE }}
       - name: AWS Account
         run: aws sts get-caller-identity
-      - name: Deploy
+      - name: Deploy Infrastructure
         working-directory: ./scripts
-        run: ./deploy.sh
+        run: ./deploy_infrastructure.sh
         env:
           AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
           TF_VAR_public_ec2_key: ${{ vars.PUBLIC_EC2_KEY }}
           TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           TF_VAR_secret_key_base: ${{ secrets.PHX_SECRET_KEY_BASE }}
+      - name: Get Terraform Outputs
+        id: terraform_output
+        run: |
+          echo "ECS_CLUSTER=$(terraform output -raw ecs_cluster_name)" >> $GITHUB_OUTPUT
+          echo "ECS_SERVICE=$(terraform output -raw ecs_service_name)" >> $GITHUB_OUTPUT
+          echo "ECS_MIGRATION_TASK=$(terraform output -raw ecs_migration_task)" >> $GITHUB_OUTPUT
+          echo "SUBNET_IDS=$(terraform output -json private_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
+          echo "ECS_SECURITY_GROUP_ID=$terraform output -raw ecs_security_group_id" >> $GITHUB_OUTPUT
+      - name: Run Migrations
+        run: |
+          aws ecs run-task \
+            --cluster ${{ steps.terraform_output.outputs.ECS_CLUSTER }} \
+            --task-definition ${{ steps.terraform_output.outputs.ECS_MIGRATION_TASK }} \
+            --network-configuration "awsvpcConfiguration={subnets=[${{ steps.terraform_output.outputs.PRIVATE_SUBNET_IDS }}],securityGroups=[${{ steps.terraform_output.outputs.ECS_SECURITY_GROUP_ID }}]}" \
+            --launch-type FARGATE \
+            --started-by "GitHub Actions"
+      - name: Update ECS Cluster
+        run: |
+          aws ecs update-service \
+            --cluster ${{ steps.terraform_output.outputs.ECS_CLUSTER }} \
+            --service ${{ steps.terraform_output.outputs.ECS_SERVICE }} \
+            --force-new-deployment

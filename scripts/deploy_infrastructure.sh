@@ -56,13 +56,6 @@ docker tag altabarra/${APP_NAME}:latest ${REPOSITORY_URL}:${HASH}
 docker push ${REPOSITORY_URL}:latest
 docker push ${REPOSITORY_URL}:${HASH}
 
-## Update ECS Service ========================================================
-echo "STAGE: ECS cluster update"
-
-# Trigger ECS service update to refresh tasks with the new image
-aws ecs update-service \
-    --cluster ${ECS_CLUSTER} \
-    --service ${ECS_SERVICE} \
-    --force-new-deployment
-
 echo "Deployment [${HASH}] Completed"
+echo "Ready for cluster update via `aws ecs update-servcie --cluster ... --service ... --force-new-deployment`"
+echo "Before to run any DB migrations"

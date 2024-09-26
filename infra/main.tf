@@ -837,3 +837,41 @@ resource "aws_vpc_security_group_ingress_rule" "rds_from_ecs_ingress" {
     Name = "${var.environment}-SGR-rds-from-ecs-ingress"
   }
 }
+
+## DB Migration Task =========================================================
+resource "aws_ecs_task_definition" "migration_task" {
+  family                   = "${var.namespace}_db-migration-task_${var.environment}"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = "256"
+  memory                   = "512"
+  execution_role_arn       = aws_iam_role.ecs_execution_role.arn
+  task_role_arn            = aws_iam_role.ecs_task_role.arn
+
+  container_definitions = jsonencode([
+    {
+      name    = "${var.namespace}_ECS_FARGATE_migration-container_${var.environment}"
+      image   = "${module.ecr.repository_url}:${var.hash}"
+      command = ["/app/bin/migrate"]
+      environment = [
+        {
+          name  = "DATABASE_URL",
+          value = "ecto://altabarra:${module.secrets_manager.secret_string}@${module.rds.db_endpoint}/${module.rds.db_name}"
+        }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.migration_logs.name
+          awslogs-region        = var.region
+          awslogs-stream-prefix = "ecs"
+        }
+      }
+    }
+  ])
+}
+
+resource "aws_cloudwatch_log_group" "migration_logs" {
+  name              = "/${lower(var.namespace)}/ecs/db-migration-logs"
+  retention_in_days = 30
+}
