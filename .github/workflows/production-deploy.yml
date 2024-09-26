@@ -34,24 +34,25 @@ jobs:
           TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           TF_VAR_secret_key_base: ${{ secrets.PHX_SECRET_KEY_BASE }}
       - name: Get Terraform Outputs
-        id: terraform_output
+        working-directory: ./infra
+        id: tofu_output
         run: |
-          echo "ECS_CLUSTER=$(terraform output -raw ecs_cluster_name)" >> $GITHUB_OUTPUT
-          echo "ECS_SERVICE=$(terraform output -raw ecs_service_name)" >> $GITHUB_OUTPUT
-          echo "ECS_MIGRATION_TASK=$(terraform output -raw ecs_migration_task)" >> $GITHUB_OUTPUT
-          echo "SUBNET_IDS=$(terraform output -json private_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
-          echo "ECS_SECURITY_GROUP_ID=$terraform output -raw ecs_security_group_id" >> $GITHUB_OUTPUT
+          echo "ECS_CLUSTER=$(tofu output -raw ecs_cluster_name)" >> $GITHUB_OUTPUT
+          echo "ECS_SERVICE=$(tofu output -raw ecs_service_name)" >> $GITHUB_OUTPUT
+          echo "ECS_MIGRATION_TASK=$(tofu output -raw ecs_migration_task)" >> $GITHUB_OUTPUT
+          echo "SUBNET_IDS=$(tofu output -json private_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
+          echo "ECS_SECURITY_GROUP_ID=$tofu output -raw ecs_security_group_id" >> $GITHUB_OUTPUT
       - name: Run Migrations
         run: |
           aws ecs run-task \
-            --cluster ${{ steps.terraform_output.outputs.ECS_CLUSTER }} \
-            --task-definition ${{ steps.terraform_output.outputs.ECS_MIGRATION_TASK }} \
-            --network-configuration "awsvpcConfiguration={subnets=[${{ steps.terraform_output.outputs.PRIVATE_SUBNET_IDS }}],securityGroups=[${{ steps.terraform_output.outputs.ECS_SECURITY_GROUP_ID }}]}" \
+            --cluster ${{ steps.tofu_output.outputs.ECS_CLUSTER }} \
+            --task-definition ${{ steps.tofu_output.outputs.ECS_MIGRATION_TASK }} \
+            --network-configuration "awsvpcConfiguration={subnets=[${{ steps.tofu_output.outputs.PRIVATE_SUBNET_IDS }}],securityGroups=[${{ steps.tofu_output.outputs.ECS_SECURITY_GROUP_ID }}]}" \
             --launch-type FARGATE \
             --started-by "GitHub Actions"
       - name: Update ECS Cluster
         run: |
           aws ecs update-service \
-            --cluster ${{ steps.terraform_output.outputs.ECS_CLUSTER }} \
-            --service ${{ steps.terraform_output.outputs.ECS_SERVICE }} \
+            --cluster ${{ steps.tofu_output.outputs.ECS_CLUSTER }} \
+            --service ${{ steps.tofu_output.outputs.ECS_SERVICE }} \
             --force-new-deployment
