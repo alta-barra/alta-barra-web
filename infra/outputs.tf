@@ -14,11 +14,6 @@ output "rds_db_instance_endpoint" {
   value = module.rds.db_endpoint
 }
 
-output "migration_task_definition_arn" {
-  value       = aws_ecs_task_definition.migration_task.arn
-  description = "ARN of the migration task definition"
-}
-
 output "private_subnet_ids" {
   value       = aws_subnet.private[*].id
   description = "IDs of the private subnets"

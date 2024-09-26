@@ -840,7 +840,7 @@ resource "aws_vpc_security_group_ingress_rule" "rds_from_ecs_ingress" {
 
 ## DB Migration Task =========================================================
 resource "aws_ecs_task_definition" "migration_task" {
-  family                   = "${var.namespace}_db-migration-task_${var.environment}"
+  family                   = "migration-task"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = "256"
@@ -850,7 +850,7 @@ resource "aws_ecs_task_definition" "migration_task" {
 
   container_definitions = jsonencode([
     {
-      name    = "${var.namespace}_ECS_FARGATE_migration-container_${var.environment}"
+      name    = "migration-container"
       image   = "${module.ecr.repository_url}:${var.hash}"
       command = ["/app/bin/migrate"]
       environment = [
