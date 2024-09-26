@@ -22,6 +22,7 @@ defmodule AltabarraWeb.Router do
 
     get "/", PageController, :home
     get "/status", HealthcheckController, :status
+    get "/contact", PageController, :contact
   end
 
   # Other scopes may use custom stacks.
