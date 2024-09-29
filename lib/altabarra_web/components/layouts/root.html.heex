@@ -10,7 +10,36 @@
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
-
+    <!-- SEO Things -->
+    <meta
+      name="description"
+      content="Alta Barra offers expert software and cloud engineering services tailored for smaller projects and ongoing maintenance."
+    />
+    <meta
+      name="keywords"
+      content="software services, cloud engineering, software maintenance, Alta Barra"
+    />
+    <meta name="robots" content="index,follow" />
+    <!-- Open Graph tags -->
+    <meta property="og:site_name" content="Alta Barra" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content={assigns[:og_title] || "Alta Barra Software"} />
+    <meta
+      property="og:description"
+      content={assigns[:og_description] || "Home of Alta Barra software and cloud engineering."}
+    />
+    <meta property="og:url" content={Phoenix.Controller.current_url(@conn)} />
+    <meta property="og:type" content="website" />
+    <!-- Structured data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Alta Barra",
+        "url": "<%= Phoenix.Controller.current_url(@conn) %>"
+      }
+    </script>
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
