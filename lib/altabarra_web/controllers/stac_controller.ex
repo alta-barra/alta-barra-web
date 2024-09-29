@@ -151,6 +151,8 @@ defmodule AltabarraWeb.StacController do
   end
 
   defp get_base_url(conn) do
-    "#{conn.scheme}://#{conn.host}#{if conn.port, do: ":#{conn.port}", else: ""}/api/stac"
+    port = if conn.port in [80, 443], do: "", else: ":#{conn.port}"
+
+    "#{conn.scheme}://#{conn.host}#{port}/api/stac"
   end
 end
