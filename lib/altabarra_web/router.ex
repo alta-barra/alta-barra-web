@@ -25,6 +25,17 @@ defmodule AltabarraWeb.Router do
     get "/contact", PageController, :contact
   end
 
+  scope "/api/stac", AltabarraWeb do
+    pipe_through :api
+
+    get "/", StacController, :root_catalog
+    get "/search", StacController, :search
+    get "/collections", StacController, :list_collections
+    get "/collections/:id", StacController, :get_collection
+    get "/collections/:collection_id/items", StacController, :list_items
+    get "/collections/:collection_id/items/:item_id", StacController, :get_item
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", AltabarraWeb do
   #   pipe_through :api
