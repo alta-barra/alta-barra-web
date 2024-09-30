@@ -1,0 +1,19 @@
+<.header>
+  Page view <%= @page_view.id %>
+  <:subtitle>This is a page_view record from your database.</:subtitle>
+  <:actions>
+    <.link href={~p"/page_views/#{@page_view}/edit"}>
+      <.button>Edit page_view</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Url"><%= @page_view.url %></:item>
+  <:item title="User agent"><%= @page_view.user_agent %></:item>
+  <:item title="Ip address"><%= @page_view.ip_address %></:item>
+  <:item title="Referer"><%= @page_view.referer %></:item>
+  <:item title="Timestamp"><%= @page_view.timestamp %></:item>
+</.list>
+
+<.back navigate={~p"/page_views"}>Back to page_views</.back>

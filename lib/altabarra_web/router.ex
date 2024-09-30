@@ -2,6 +2,8 @@ defmodule AltabarraWeb.Router do
   use AltabarraWeb, :router
 
   import AltabarraWeb.UserAuth
+  alias Altabarra.Accounts.User
+  alias Altabarra.Analytics
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -11,6 +13,7 @@ defmodule AltabarraWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_user
+    plug :track_analytics
   end
 
   pipeline :api do
@@ -88,6 +91,36 @@ defmodule AltabarraWeb.Router do
       on_mount: [{AltabarraWeb.UserAuth, :mount_current_user}] do
       live "/users/confirm/:token", UserConfirmationLive, :edit
       live "/users/confirm", UserConfirmationInstructionsLive, :new
+    end
+  end
+
+  scope "/admin", AltabarraWeb do
+    pipe_through [:browser, :require_authenticated_user, :ensure_admin]
+
+    live_session :analytics,
+      on_mount: [{AltabarraWeb.UserAuth, :ensure_authenticated}] do
+      live "/analytics", AnalyticsDashboardLive, :index
+    end
+  end
+
+  defp track_analytics(conn, _opts) do
+    Task.start(fn -> Altabarra.Analytics.track_page_view(conn) end)
+    conn
+  end
+
+  defp ensure_admin(conn, _) do
+    case conn.assigns[:current_user] do
+      %User{role: "admin"} ->
+        conn
+
+      _ ->
+        conn
+        |> put_flash(
+          :error,
+          "You must be an administrator or have administrative rights to access this page."
+        )
+        |> redirect(to: "/")
+        |> halt()
     end
   end
 end
