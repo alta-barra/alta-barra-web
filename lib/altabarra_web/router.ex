@@ -18,6 +18,7 @@ defmodule AltabarraWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug Corsica, origins: "*"
   end
 
   scope "/", AltabarraWeb do

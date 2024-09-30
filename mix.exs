@@ -59,7 +59,8 @@ defmodule Altabarra.MixProject do
       {:jason, "~> 1.4"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.2"},
-      {:tesla, "~> 1.11"}
+      {:tesla, "~> 1.11"},
+      {:corsica, "~> 2.0"}
     ]
   end
 
