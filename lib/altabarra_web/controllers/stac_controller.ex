@@ -1,7 +1,7 @@
 defmodule AltabarraWeb.StacController do
   use AltabarraWeb, :controller
 
-  alias Altabarra.Stac.CMRSearch, as: Search
+  alias Altabarra.Stac.CMRSearch, as: Stac
 
   def root_catalog(conn, _params) do
     base_url = get_base_url(conn)
@@ -35,24 +35,25 @@ defmodule AltabarraWeb.StacController do
     json(conn, catalog)
   end
 
-  def search(conn, params) do
-    base_url = get_base_url(conn)
+  def search(conn, _params) do
+    redirect(conn, to: ~p"/api/stac")
+    # base_url = get_base_url(conn)
 
-    case Search.search_items(params, base_url) do
-      {:ok, items} ->
-        json(conn, %{type: "FeatureCollection", features: items})
+    # case Stac.search_items(params, base_url) do
+    #   {:ok, items} ->
+    #     json(conn, %{type: "FeatureCollection", features: items})
 
-      {:error, message} ->
-        conn
-        |> put_status(:internal_server_error)
-        |> json(%{error: message})
-    end
+    #   {:error, message} ->
+    #     conn
+    #     |> put_status(:internal_server_error)
+    #     |> json(%{error: message})
+    # end
   end
 
   def list_collections(conn, params) do
     base_url = get_base_url(conn)
 
-    case Search.search_collections(params, base_url) do
+    case Stac.search_collections(params, base_url) do
       {:ok, collections} ->
         json(conn, %{collections: collections})
 
@@ -66,7 +67,7 @@ defmodule AltabarraWeb.StacController do
   def get_collection(conn, %{"id" => id}) do
     base_url = get_base_url(conn)
 
-    case Search.search_collections(%{"short_name" => id}, base_url) do
+    case Stac.search_collections(%{"short_name" => id}, base_url) do
       {:ok, [collection | _]} ->
         json(conn, collection)
 
@@ -85,7 +86,7 @@ defmodule AltabarraWeb.StacController do
   def list_items(conn, %{"collection_id" => collection_id} = params) do
     base_url = get_base_url(conn)
     # First, we need to get the collection's concept_id
-    case Search.search_collections(%{"short_name" => collection_id}, base_url) do
+    case Stac.search_collections(%{"short_name" => collection_id}, base_url) do
       {:ok, [collection | _]} ->
         collection_concept_id = collection["properties"]["cmr:concept_id"]
 
@@ -94,7 +95,7 @@ defmodule AltabarraWeb.StacController do
           |> Map.put("collection_concept_id", collection_concept_id)
           |> Map.delete("collection_id")
 
-        case Search.search_items(params, base_url) do
+        case Stac.search_items(params, base_url) do
           {:ok, items} ->
             json(conn, %{type: "FeatureCollection", features: items})
 
@@ -119,11 +120,11 @@ defmodule AltabarraWeb.StacController do
   def get_item(conn, %{"collection_id" => collection_id, "item_id" => item_id}) do
     base_url = get_base_url(conn)
     # First, we need to get the collection's concept_id
-    case Search.search_collections(%{"short_name" => collection_id}, base_url) do
+    case Stac.search_collections(%{"short_name" => collection_id}, base_url) do
       {:ok, [collection | _]} ->
         concept_id = collection["properties"]["cmr:concept_id"]
 
-        case Search.search_items(%{"short_name" => item_id, "collection" => concept_id}, base_url) do
+        case Stac.search_items(%{"granule_ur" => item_id, "collection" => concept_id}, base_url) do
           {:ok, [item | _]} ->
             json(conn, item)
 

@@ -36,11 +36,6 @@ defmodule AltabarraWeb.Router do
     get "/collections/:collection_id/items/:item_id", StacController, :get_item
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", AltabarraWeb do
-  #   pipe_through :api
-  # end
-
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:altabarra, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put

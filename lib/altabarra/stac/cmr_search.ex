@@ -4,13 +4,13 @@ defmodule Altabarra.Stac.CMRSearch do
   """
 
   alias Altabarra.LRUCache, as: FastCache
-  alias Altabarra.Cache
-  alias Altabarra.Stac.SearchKeyGenerator
+  alias Altabarra.Stac.GeoUtils
 
   use Tesla
 
-  @collection_cache :cmr_collection_cache
+  @stac_cache Altabarra.LRUCache.CMRCollectionCache
   @cmr_root "https://cmr.earthdata.nasa.gov"
+  @providers_cache_key "cmr_providers"
 
   plug Tesla.Middleware.BaseUrl, @cmr_root
   plug Tesla.Middleware.JSON
@@ -69,16 +69,19 @@ defmodule Altabarra.Stac.CMRSearch do
     collection_concept_id = granule["collection_concept_id"]
 
     collection_id =
-      case FastCache.get(@collection_cache, collection_concept_id) do
+      case FastCache.get(@stac_cache, collection_concept_id) do
         nil -> fetch_and_cache_collection(collection_concept_id)
         cached_result -> cached_result
       end
 
+    bbox = GeoUtils.cmr_spatial_to_stac_bbox(granule)
+
     %{
       "type" => "Feature",
       "id" => granule["title"],
-      "collection" => granule["collection_concept_id"],
-      "geometry" => parse_granule_geometry(granule),
+      "collection" => collection_id,
+      # "geometry" => geometry,
+      "bbox" => bbox,
       "properties" => %{
         "datetime" => granule["time_start"],
         "start_datetime" => granule["time_start"],
@@ -86,7 +89,10 @@ defmodule Altabarra.Stac.CMRSearch do
         "created" => granule["insert_time"],
         "updated" => granule["update_time"],
         "cmr:granule_ur" => granule["title"],
-        "cmr:concept_id" => granule["id"]
+        "cmr:concept_id" => granule["id"],
+        "cmr:dataset_id" => granule["dataset_id"],
+        "cmr:data_center" => granule["data_center"],
+        "cmr:collection_concept_id" => granule["collection_concept_id"]
       },
       "assets" => convert_granule_links_to_assets(granule["links"]),
       "links" => [
@@ -128,7 +134,7 @@ defmodule Altabarra.Stac.CMRSearch do
     with {:ok, response} <-
            get("/search/collections.json", query: %{"concept_id" => collection_concept_id}),
          [collection | _] <- response.body["feed"]["entry"] do
-      FastCache.put(@collection_cache, collection["id"], collection["short_name"])
+      FastCache.put(@stac_cache, collection["id"], collection["short_name"])
       collection["short_name"]
     else
       _ -> nil
@@ -137,6 +143,7 @@ defmodule Altabarra.Stac.CMRSearch do
 
   defp convert_collection_to_stac_collection(collection, base_url) do
     cmr_concept_id = collection["id"]
+    bbox = GeoUtils.cmr_spatial_to_stac_bbox(collection)
 
     %{
       "type" => "Collection",
@@ -146,7 +153,7 @@ defmodule Altabarra.Stac.CMRSearch do
       "license" => "various",
       "extent" => %{
         "spatial" => %{
-          "bbox" => parse_bbox(collection["boxes"])
+          "bbox" => bbox
         },
         "temporal" => %{
           "interval" => [[collection["time_start"], collection["time_end"]]]
@@ -187,53 +194,56 @@ defmodule Altabarra.Stac.CMRSearch do
     }
   end
 
-  defp parse_granule_geometry(%{"boxes" => geometry}) do
-    IO.inspect(geometry)
-    "BOX"
-  end
-
-  defp parse_granule_geometry(%{"polygons" => geometry}) do
-    IO.inspect(geometry)
-    "POLYGONS"
-  end
-
-  defp parse_granule_geometry(%{"points" => geometry}) do
-    IO.inspect(geometry)
-    "POINTS"
-  end
-
-  defp parse_granule_geometry(%{"lines" => geometry}) do
-    IO.inspect(geometry)
-    "LINES"
-  end
-
-  defp parse_bbox(boxes) do
-    boxes
-    |> Enum.at(0, "")
-    |> case do
-      "" ->
-        []
-
-      box ->
-        box
-        |> String.split(~r/\s/)
-        |> Enum.map(fn s ->
-          case Float.parse(s) do
-            {num, _} -> num
-            :error -> nil
-          end
-        end)
-        |> Enum.reject(&is_nil/1)
-    end
-  end
-
   defp convert_granule_links_to_assets(links) do
     Enum.reduce(links, %{}, fn link, acc ->
+      IO.inspect(link)
+
       Map.put(acc, link["rel"], %{
         "href" => link["href"],
         "type" => link["type"],
         "title" => link["title"]
       })
     end)
+  end
+
+  def fetch_providers do
+    case FastCache.get(:default, @providers_cache_key) do
+      nil -> fetch_and_cache_providers()
+      cached_result -> {:ok, decode_cached_result(cached_result)}
+    end
+  end
+
+  defp fetch_and_cache_providers do
+    case get("/search/providers") do
+      {:ok, %{status: 200, body: body}} ->
+        provider_ids = extract_provider_ids(body)
+        cache_provider_ids(provider_ids)
+        {:ok, provider_ids}
+
+      {:ok, %{status: status}} ->
+        {:error, "Failed to fetch providers: HTTP #{status}"}
+
+      {:error, reason} ->
+        {:error, "Request failed: #{inspect(reason)}"}
+    end
+  end
+
+  defp extract_provider_ids(body) do
+    body["items"]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.map(fn provider ->
+      provider["Organizations"]
+      |> List.first()
+      |> Map.get("ShortName")
+    end)
+  end
+
+  defp cache_provider_ids(provider_ids) do
+    encoded_ids = :erlang.term_to_binary(provider_ids)
+    FastCache.put(:default, @providers_cache_key, encoded_ids)
+  end
+
+  defp decode_cached_result(cached_result) do
+    :erlang.binary_to_term(cached_result)
   end
 end

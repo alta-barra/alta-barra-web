@@ -12,7 +12,10 @@ defmodule Altabarra.Application do
       {Phoenix.PubSub, name: Altabarra.PubSub},
       {Finch, name: Altabarra.Finch},
       # In-memory caches
-      {Altabarra.LRUCache, :cmr_collection_cache},
+      Supervisor.child_spec({Altabarra.LRUCache, Altabarra.LRUCache.Default}, id: :cache_0),
+      Supervisor.child_spec({Altabarra.LRUCache, Altabarra.LRUCache.CMRCollectionCache},
+        id: :cache_1
+      ),
       # DB backed cache
       Altabarra.Cache,
       AltabarraWeb.Endpoint
