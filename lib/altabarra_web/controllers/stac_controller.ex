@@ -8,7 +8,7 @@ defmodule AltabarraWeb.StacController do
 
     catalog = %{
       "type" => "Catalog",
-      "id" => "cmr-stac-api",
+      "id" => "alta-barra-stac-api",
       "stac_version" => "1.0.0",
       "description" =>
         "NASA CMR STAC API by Alta Barra. Please reference the official https://cmr.earthdata.nasa.gov/stac for any production based uses.",
