@@ -196,8 +196,6 @@ defmodule Altabarra.Stac.CMRSearch do
 
   defp convert_granule_links_to_assets(links) do
     Enum.reduce(links, %{}, fn link, acc ->
-      IO.inspect(link)
-
       Map.put(acc, link["rel"], %{
         "href" => link["href"],
         "type" => link["type"],
