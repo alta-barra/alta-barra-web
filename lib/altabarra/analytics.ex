@@ -4,9 +4,11 @@ defmodule Altabarra.Analytics do
   """
 
   import Ecto.Query, warn: false
+  alias Hex.API.User
   alias Altabarra.Repo
 
   alias Altabarra.Analytics.PageView
+  alias Altabarra.Accounts
 
   @doc """
   Returns the list of page_views.
@@ -157,5 +159,25 @@ defmodule Altabarra.Analytics do
       timestamp: pv.timestamp
     })
     |> Repo.all()
+  end
+
+  def get_new_users(days) do
+    start_date = DateTime.utc_now() |> DateTime.add(-days, :day)
+
+    Accounts.User
+    |> where([u], u.inserted_at >= ^start_date)
+    |> select([u], count(u.id))
+    |> Repo.one()
+  end
+
+  def get_active_users(days) do
+    cutoff_time = DateTime.utc_now() |> DateTime.add(-days, :day)
+
+    Accounts.UserToken
+    |> where([t], t.inserted_at >= ^cutoff_time)
+    |> select([t], t.user_id)
+    |> distinct(true)
+    |> Repo.all()
+    |> length()
   end
 end
