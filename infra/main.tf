@@ -751,7 +751,7 @@ resource "aws_security_group" "bastion_host" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["18.206.107.24/29"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -764,7 +764,7 @@ resource "aws_security_group" "bastion_host" {
 }
 
 resource "aws_instance" "bastion_host" {
-  count                       = 0
+  count                       = 1
   ami                         = data.aws_ami.amazon_linux_2.id
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.public[0].id
