@@ -25,18 +25,35 @@ defmodule Altabarra.MixProject do
 
   defp deps do
     [
-      {:bcrypt_elixir, "~> 3.0"},
-      {:phoenix, "~> 1.7.12"},
-      {:phoenix_ecto, "~> 4.4"},
-      {:ecto_sql, "~> 3.10"},
-      {:postgrex, ">= 0.0.0"},
+      # Phoenix and web-related
+      {:bandit, "~> 1.2"},
+      {:corsica, "~> 2.0"},
+      {:phoenix, "~> 1.7.14"},
       {:phoenix_html, "~> 4.0"},
-      {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 0.20.2"},
-      {:floki, ">= 0.30.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.3"},
+      {:phoenix_live_reload, "~> 1.5.3", only: :dev},
+      {:phoenix_live_view, "~> 0.20.17"},
+
+      # Database and Ecto
+      {:dns_cluster, "~> 0.1.1"},
+      {:ecto_sql, "~> 3.12"},
+      {:phoenix_ecto, "~> 4.6"},
+      {:postgrex, ">= 0.0.0"},
+
+      # Authentication
+      {:bcrypt_elixir, "~> 3.0"},
+
+      # Asset compilation
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
+
+      # HTTP client and API-related
+      {:finch, "~> 0.13"},
+      {:tesla, "~> 1.11"},
+
+      # Utilities and helpers
+      {:floki, ">= 0.30.0", only: :test},
+      {:gettext, "~> 0.20"},
       {:heroicons,
        github: "tailwindlabs/heroicons",
        tag: "v2.1.1",
@@ -44,16 +61,12 @@ defmodule Altabarra.MixProject do
        app: false,
        compile: false,
        depth: 1},
-      {:swoosh, "~> 1.5"},
-      {:finch, "~> 0.13"},
-      {:telemetry_metrics, "~> 1.0"},
-      {:telemetry_poller, "~> 1.0"},
-      {:gettext, "~> 0.20"},
       {:jason, "~> 1.4"},
-      {:dns_cluster, "~> 0.1.1"},
-      {:bandit, "~> 1.2"},
-      {:tesla, "~> 1.11"},
-      {:corsica, "~> 2.0"}
+      {:swoosh, "~> 1.5"},
+
+      # Telemetry and monitoring
+      {:telemetry_metrics, "~> 1.0"},
+      {:telemetry_poller, "~> 1.0"}
     ]
   end
 
