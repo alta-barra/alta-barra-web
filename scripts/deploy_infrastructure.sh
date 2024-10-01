@@ -57,5 +57,5 @@ docker push ${REPOSITORY_URL}:latest
 docker push ${REPOSITORY_URL}:${HASH}
 
 echo "Deployment [${HASH}] Completed"
-echo "Ready for cluster update via `aws ecs update-servcie --cluster ... --service ... --force-new-deployment`"
+echo "Ready for cluster update via aws ecs update-service --cluster ... --service ... --force-new-deployment"
 echo "Before to run any DB migrations"
