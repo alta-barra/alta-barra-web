@@ -55,6 +55,8 @@ COPY lib lib
 
 COPY assets assets
 
+copy scripts/entrypoint.sh /entrypoint.sh
+
 # compile assets
 RUN mix assets.deploy
 
@@ -93,6 +95,7 @@ ENV ERL_FLAGS="+JPperf true"
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/altabarra ./
 RUN mkdir -p /etc/ssl/certs
 COPY --from=builder --chown=nobody:root /etc/ssl/certs/rds-combined-ca-bundle.pem /etc/ssl/certs/rds-combined-ca-bundle.pem
+COPY --from=builder --chown=nobody:root /entrypoint.sh /entrypoint.sh
 
 USER nobody
 
@@ -101,4 +104,5 @@ USER nobody
 # above and adding an entrypoint. See https://github.com/krallin/tini for details
 # ENTRYPOINT ["/tini", "--"]
 
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/app/bin/server"]

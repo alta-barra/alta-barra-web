@@ -377,10 +377,6 @@ resource "aws_ecs_task_definition" "default" {
         {
           name  = "DB_NAME",
           value = module.rds.db_name
-        },
-        {
-          name  = "DATABASE_URL",
-          value = "ecto://altabarra:${module.secrets_manager.secret_string}@${module.rds.db_endpoint}/${module.rds.db_name}"
         }
       ]
 
@@ -853,14 +849,28 @@ resource "aws_ecs_task_definition" "migration_task" {
       name    = "migration-container"
       image   = "${module.ecr.repository_url}:${var.hash}"
       command = ["/app/bin/migrate"]
+      secrets = [
+        {
+          name      = "DB_PASSWORD",
+          valueFrom = module.secrets_manager.secret_arn
+        }
+      ]
       environment = [
         {
           name  = "SECRET_KEY_BASE",
           value = var.secret_key_base
         },
         {
-          name  = "DATABASE_URL",
-          value = "ecto://altabarra:${module.secrets_manager.secret_string}@${module.rds.db_endpoint}/${module.rds.db_name}"
+          name  = "DB_USER",
+          value = "altabarra"
+        },
+        {
+          name  = "DB_HOST",
+          value = module.rds.db_endpoint
+        },
+        {
+          name  = "DB_NAME",
+          value = module.rds.db_name
         }
       ]
       logConfiguration = {

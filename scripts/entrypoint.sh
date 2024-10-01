@@ -1,10 +1,14 @@
 #!/bin/bash
 set -e
 
-# Construct the DATABASE_URL from environment variables
+# Ensure required environment variables are set
+: "${DB_USERNAME:?Need to set DB_USERNAME}"
+: "${DB_PASSWORD:?Need to set DB_PASSWORD}"
+: "${DB_HOST:?Need to set DB_HOST}"
+: "${DB_NAME:?Need to set DB_NAME}"
+
+# Construct the DATABASE_URL
 export DATABASE_URL="ecto://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}"
 
-echo "DATABASE_URL constructed: $DATABASE_URL"
-
-# Start the application (replace this with your actual start command)
+# Execute the application start command
 exec "$@"
