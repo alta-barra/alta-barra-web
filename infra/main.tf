@@ -367,7 +367,7 @@ resource "aws_ecs_task_definition" "default" {
           value = var.secret_key_base
         },
         {
-          name  = "DB_USER",
+          name  = "DB_USERNAME",
           value = "altabarra"
         },
         {
@@ -861,7 +861,7 @@ resource "aws_ecs_task_definition" "migration_task" {
           value = var.secret_key_base
         },
         {
-          name  = "DB_USER",
+          name  = "DB_USERNAME",
           value = "altabarra"
         },
         {

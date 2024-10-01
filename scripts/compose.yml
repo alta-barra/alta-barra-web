@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: ${DB_USER:-altabarra}
+      POSTGRES_USER: ${DB_USERNAME:-altabarra}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-altabarra}
       POSTGRES_DB: ${DB_NAME:-altabarra}
       PGDATA: /var/lib/postgresql/data/pgdata
@@ -19,7 +19,7 @@ services:
       - postgres_data:/var/lib/postgresql/data/pgdata
       - postgres_export:/export
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-altabarra}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-altabarra}"]
       interval: 10s
       timeout: 5s
       retries: 5
