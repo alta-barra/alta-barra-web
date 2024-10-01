@@ -21,6 +21,10 @@ defmodule AltabarraWeb.Router do
     plug Corsica, origins: "*"
   end
 
+  pipeline :admin do
+    plug :ensure_admin
+  end
+
   scope "/", AltabarraWeb do
     pipe_through :browser
 
@@ -40,25 +44,7 @@ defmodule AltabarraWeb.Router do
     get "/collections/:collection_id/items/:item_id", StacController, :get_item
   end
 
-  # Enable LiveDashboard and Swoosh mailbox preview in development
-  if Application.compile_env(:altabarra, :dev_routes) do
-    # If you want to use the LiveDashboard in production, you should put
-    # it behind authentication and allow only admins to access it.
-    # If your application does not have an admins-only section yet,
-    # you can use Plug.BasicAuth to set up some basic authentication
-    # as long as you are also using SSL (which you should anyway).
-    import Phoenix.LiveDashboard.Router
-
-    scope "/dev" do
-      pipe_through :browser
-
-      live_dashboard "/dashboard", metrics: AltabarraWeb.Telemetry
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
-    end
-  end
-
-  ## Authentication routes
-
+  # Authentication routes
   scope "/", AltabarraWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
@@ -96,7 +82,7 @@ defmodule AltabarraWeb.Router do
   end
 
   scope "/admin", AltabarraWeb do
-    pipe_through [:browser, :require_authenticated_user, :ensure_admin]
+    pipe_through [:browser, :require_authenticated_user, :admin]
 
     live_session :analytics,
       on_mount: [{AltabarraWeb.UserAuth, :ensure_authenticated}] do
@@ -104,8 +90,24 @@ defmodule AltabarraWeb.Router do
     end
   end
 
+  # Development routes
+  if Application.compile_env(:altabarra, :dev_routes) do
+    import Phoenix.LiveDashboard.Router
+
+    scope "/dev" do
+      pipe_through :browser
+
+      live_dashboard "/dashboard", metrics: AltabarraWeb.Telemetry
+      forward "/mailbox", Plug.Swoosh.MailboxPreview
+    end
+  end
+
+  @ignored_paths ["/status", "/admin"]
   defp track_analytics(conn, _opts) do
-    Task.start(fn -> Altabarra.Analytics.track_page_view(conn) end)
+    unless Enum.any?(@ignored_paths, &String.starts_with?(conn.request_path, &1)) do
+      Task.start(fn -> Analytics.track_page_view(conn) end)
+    end
+
     conn
   end
 
@@ -116,10 +118,7 @@ defmodule AltabarraWeb.Router do
 
       _ ->
         conn
-        |> put_flash(
-          :error,
-          "You must be an administrator or have administrative rights to access this page."
-        )
+        |> put_flash(:error, "You must be an administrator to access this page.")
         |> redirect(to: "/")
         |> halt()
     end

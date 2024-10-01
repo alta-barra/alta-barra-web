@@ -4,7 +4,6 @@ defmodule Altabarra.Analytics do
   """
 
   import Ecto.Query, warn: false
-  alias Hex.API.User
   alias Altabarra.Repo
 
   alias Altabarra.Analytics.PageView
@@ -112,9 +111,13 @@ defmodule Altabarra.Analytics do
   end
 
   defp get_ip_address(conn) do
-    conn.remote_ip
-    |> :inet.ntoa()
-    |> to_string()
+    conn
+    |> Plug.Conn.get_req_header("x-forwarded-for")
+    |> List.first()
+    |> case do
+      nil -> conn.remote_ip |> :inet.ntoa() |> to_string()
+      ip -> ip
+    end
   end
 
   defp get_referrer(conn) do
@@ -130,6 +133,7 @@ defmodule Altabarra.Analytics do
       user_agent: get_user_agent(conn),
       ip_address: get_ip_address(conn),
       referrer: get_referrer(conn),
+      host: get_forwarded_host(conn),
       timestamp: NaiveDateTime.utc_now()
     }
     |> create_page_view()
@@ -137,6 +141,12 @@ defmodule Altabarra.Analytics do
 
   def get_total_page_views do
     Repo.aggregate(PageView, :count, :id)
+  end
+
+  defp get_forwarded_host(conn) do
+    conn
+    |> Plug.Conn.get_req_header("x-forwarded-host")
+    |> List.first()
   end
 
   def get_top_pages(limit) do

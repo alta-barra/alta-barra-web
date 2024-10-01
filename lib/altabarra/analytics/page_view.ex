@@ -7,6 +7,7 @@ defmodule Altabarra.Analytics.PageView do
     field :url, :string
     field :user_agent, :string
     field :ip_address, :string
+    field :host, :string
     field :referer, :string
 
     timestamps(type: :utc_datetime)
@@ -15,7 +16,7 @@ defmodule Altabarra.Analytics.PageView do
   @doc false
   def changeset(page_view, attrs) do
     page_view
-    |> cast(attrs, [:url, :user_agent, :ip_address, :referer, :timestamp])
+    |> cast(attrs, [:url, :user_agent, :ip_address, :referer, :host, :timestamp])
     |> validate_required([:url, :ip_address, :timestamp])
   end
 end

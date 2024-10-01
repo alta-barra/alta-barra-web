@@ -3,10 +3,7 @@ defmodule AltabarraWeb.HealthcheckController do
 
   use AltabarraWeb, :controller
 
-
   def status(conn, _params) do
-    services_status = %{webapp: "normal"}
-
-    json(conn, services_status)
+    render(conn, :healthcheck, overall_status: "OK", services_status: [["WebApp", "OK"]])
   end
 end
