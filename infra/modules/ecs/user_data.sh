@@ -3,7 +3,7 @@
 yum update -y
 
 # Install curl
-yum install -y curl
+yum install -y curl tar
 
 # Install Erlang
 # Add the RabbitMQ repository for Erlang (uses a common repo)
