@@ -25,7 +25,16 @@ resource "aws_s3_bucket" "elixir_app_bucket" {
   bucket = "alta-barra-elixir-app-deployments-bucket"
 }
 
+resource "aws_s3_bucket_ownership_controls" "default" {
+  bucket = aws_s3_bucket.elixir_app_bucket.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
 resource "aws_s3_bucket_acl" "bucket_acl" {
+  depends_on = [aws_s3_bucket_ownership_controls.default]
+
   bucket = aws_s3_bucket.elixir_app_bucket.id
   acl    = "private"
 }
