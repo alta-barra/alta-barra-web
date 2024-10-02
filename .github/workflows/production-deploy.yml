@@ -10,55 +10,48 @@ permissions:
   contents: read
 
 jobs:
-  deployment:
+  deployment_infrastructure:
+    name: Provision deployment Infrastructure
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      s3_bucket: ${{ steps.tofu_output.S3_BUCKET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+      - run: tofu init --chdir=infra/deploy
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - run: tofu apply -auto-approve -chdir=infra/deploy
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Get Tofu Outputs
+        working-directory: ./infra/deploy
+        id: tofu_output
+        run: |
+          echo "S3_BUCKET=$(tofu output -raw deployment_bucket_id)" >> $GITHUB_OUTPUT"
+
+  build_and_upload:
+    needs: deployment_infrastructure
     name: Deploy to Production
     runs-on: ubuntu-latest
     environment: production
-
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-elixir@v1
-        with:
-          otp-version: '27.0'
-          elixir-version: '1.17.3'
-      - name: Install dependencies
-        run: |
+      - uses: erlef/setup-beam@v1
+      - run: |
           mix local.hex --force
           mix deps.get
-      - name: Compile the app
-        run: mix release
+          mix release
         env:
           ENV: "PROD"
       - name: Create tarball
-        run: |
-          tar -czf app.tar.gz -C _build/dev/rel/altabarra
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: ${{ vars.AWS_GITHUB_ROLE }}
-      - name: AWS Account
-        run: aws sts get-caller-identity
+        run: tar -czf app.tar.gz -C _build/dev/rel/altabarra
       - name: Upload to S3
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          aws s3 cp app.tar.gz s3://alta-barra-elixir-app-deployments-bucket-production/app.tar.gz
-      - uses: opentofu/setup-opentofu@v1
-      - name: Deploy Infrastructure
-        working-directory: ./scripts
-        run: ./deploy_infrastructure.sh
-        env:
-          AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
-          TF_VAR_public_ec2_key: ${{ vars.PUBLIC_EC2_KEY }}
-          TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          TF_VAR_secret_key_base: ${{ secrets.PHX_SECRET_KEY_BASE }}
-      - name: Get Terraform Outputs
-        working-directory: ./infra
-        id: tofu_output
-        run: |
-          echo "ECS_CLUSTER=$(tofu output -raw ecs_cluster_name)" >> $GITHUB_OUTPUT
-          echo "ECS_SERVICE=$(tofu output -raw ecs_service_name)" >> $GITHUB_OUTPUT
-          echo "SUBNET_IDS=$(tofu output -json private_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
-          echo "ECS_SECURITY_GROUP_ID=$(tofu output -raw ecs_security_group_id)" >> $GITHUB_OUTPUT
+          aws s3 cp app.tar.gz s3://${{ deployment_infrastructure.outputs.tofu_output.s3_bucket}}/app.tar.gz
