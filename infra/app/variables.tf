@@ -246,3 +246,8 @@ variable "health_check" {
     "healthy_threshold"   = "3"
   }
 }
+
+variable "app_bucket" {
+  type        = string
+  description = "S3 bucket where the app.tar.gz is."
+}

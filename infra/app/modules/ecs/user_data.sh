@@ -31,3 +31,8 @@ EOF
 
 sudo yum install -y elixir
 
+aws s3 cp s3://${app_bucket}/app.tar.gz /tmp/app.tar.gz
+mkdir -p /var/www/elixir_app
+tar -xzf /tmp/app.tar.gz -C /var/www/elixir_app
+# Restart application (assuming systemd)
+systemctl restart elixir_app.service
