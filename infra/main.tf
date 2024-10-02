@@ -557,9 +557,10 @@ resource "aws_autoscaling_group" "ecs_autoscaling_group" {
 }
 
 resource "aws_alb" "alb" {
-  name            = "${var.namespace}-ALB-${var.environment}"
-  security_groups = [aws_security_group.alb.id]
-  subnets         = aws_subnet.public.*.id
+  name = "${var.namespace}-ALB-${var.environment}"
+  # NOTE: enable for ALB security_groups = [aws_security_group.alb.id]
+  load_balancer_type = "network" # NOTE: This will make this an NLB, cheaper, disable for ALB
+  subnets            = aws_subnet.public.*.id
 }
 
 resource "aws_alb_listener" "https" {
