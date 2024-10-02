@@ -63,8 +63,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          echo ${{ needs.deployment_infrastructure.outputs.s3_bucket }}
-          aws s3 cp app.tar.gz s3://${{ needs.deployment_infrastructure.outputs.tofu_output.s3_bucket}}/app.tar.gz
+          aws s3 cp app.tar.gz s3://${{ needs.deployment_infrastructure.outputs.s3_bucket }}/app.tar.gz
 
   deploy_application:
     needs: [deployment_infrastructure, build_and_upload]
