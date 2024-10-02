@@ -32,6 +32,9 @@ jobs:
       - name: Get Tofu Outputs
         working-directory: infra/deploy
         id: tofu_output
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           echo "S3_BUCKET=$(tofu output -raw s3_bucket_id)" >> $GITHUB_OUTPUT
 
