@@ -54,7 +54,7 @@ jobs:
           mix deps.get
           mix release
         env:
-          MIX_ENV: "PROD"
+          MIX_ENV: "prod"
       - name: Create tarball
         run: tar -czf app.tar.gz -C _build/prod/rel/altabarra
       - name: Upload to S3
