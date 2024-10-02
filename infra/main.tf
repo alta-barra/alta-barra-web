@@ -557,10 +557,9 @@ resource "aws_autoscaling_group" "ecs_autoscaling_group" {
 }
 
 resource "aws_alb" "alb" {
-  name = "${var.namespace}-ALB-${var.environment}"
-  # NOTE: enable for ALB security_groups = [aws_security_group.alb.id]
-  load_balancer_type = "network" # NOTE: This will make this an NLB, cheaper, disable for ALB
-  subnets            = aws_subnet.public.*.id
+  name            = "${var.namespace}-ALB-${var.environment}"
+  security_groups = [aws_security_group.alb.id]
+  subnets         = aws_subnet.public.*.id
 }
 
 resource "aws_alb_listener" "https" {
@@ -761,9 +760,9 @@ resource "aws_security_group" "bastion_host" {
 }
 
 resource "aws_instance" "bastion_host" {
-  count                       = 1
+  count                       = 0
   ami                         = data.aws_ami.amazon_linux_2.id
-  instance_type               = "t2.micro"
+  instance_type               = "t3.micro"
   subnet_id                   = aws_subnet.public[0].id
   associate_public_ip_address = true
   key_name                    = aws_key_pair.default.id
