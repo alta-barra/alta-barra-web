@@ -10,4 +10,4 @@ ecs_task_min_count     = 1
 ecs_task_max_count     = 3
 autoscaling_min_size   = 1
 autoscaling_max_size   = 5
-instance_type          = "t4g.nano"
+instance_type          = "t3.micro"
