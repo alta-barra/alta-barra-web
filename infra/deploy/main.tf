@@ -1,9 +1,28 @@
+terraform {
+  required_version = ">= 1.0.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5"
+    }
+  }
+
+  backend "s3" {
+    encrypt        = true
+    bucket         = "alta-barra-deployment-iac"
+    key            = "alta-barra-infra-deployment/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-state-lock-dynamo"
+  }
+}
+
 provider "aws" {
   region = "us-east-1"
 }
 
 resource "aws_s3_bucket" "elixir_app_bucket" {
-  bucket = "alta-barra-app-deployments-bucket"
+  bucket = "alta-barra-elixir-app-deployments-bucket"
   acl    = "private"
 }
 

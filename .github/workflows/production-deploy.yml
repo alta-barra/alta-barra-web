@@ -19,16 +19,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: opentofu/setup-opentofu@v1
-      - run: tofu init --chdir=infra/deploy
+      - run: tofu init
+        working-directory: infra/deploy
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      - run: tofu apply -auto-approve -chdir=infra/deploy
+      - run: tofu apply -auto-approve
+        working-directory: infra/deploy
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Get Tofu Outputs
-        working-directory: ./infra/deploy
+        working-directory: infra/deploy
         id: tofu_output
         run: |
           echo "S3_BUCKET=$(tofu output -raw deployment_bucket_id)" >> $GITHUB_OUTPUT"
