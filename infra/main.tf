@@ -75,12 +75,6 @@ resource "aws_route53_record" "generic_certificate_validation" {
   ttl     = 300
 }
 
-module "ecr" {
-  source      = "./modules/ecr"
-  repo_name   = "${lower(var.namespace)}/${var.service_name}"
-  environment = var.environment
-}
-
 ## Networking ================================================================
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr_block
@@ -191,29 +185,6 @@ resource "aws_key_pair" "default" {
   public_key = var.public_ec2_key
 }
 
-resource "aws_launch_template" "ecs_launch_template" {
-  name          = "${var.namespace}_EC2_LaunchTemplate_${var.environment}"
-  image_id      = data.aws_ami.amazon_linux_2_free_tier.id
-  instance_type = var.instance_type
-  key_name      = aws_key_pair.default.key_name
-
-  vpc_security_group_ids = [aws_security_group.ecs_instances.id]
-
-  iam_instance_profile {
-    arn = aws_iam_instance_profile.ec2_instance_role_profile.arn
-  }
-
-  monitoring {
-    enabled = true
-  }
-
-  # metadata_options {
-  #   http_tokens = "required"
-  # }
-
-  user_data = base64encode(templatefile("./modules/ecs/user_data.sh", { ecs_cluster_name = aws_ecs_cluster.default.name }))
-}
-
 resource "aws_iam_role" "ec2_instance_role" {
   name               = "${var.namespace}_EC2_InstanceRole_${var.environment}"
   assume_role_policy = data.aws_iam_policy_document.ec2_instance_role_policy.json
@@ -276,49 +247,6 @@ module "rds" {
   vpc_security_group_ids = [aws_security_group.rds.id]
 }
 
-## ECS  ======================================================================
-resource "aws_ecs_cluster" "default" {
-  name = "${var.namespace}_ECSCluster_${var.environment}"
-
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  tags = {
-    Name = "${var.namespace}_ECSCluster_${var.environment}"
-  }
-}
-
-resource "aws_ecs_service" "service" {
-  name                               = "${var.namespace}_ECS_Service_${var.environment}"
-  iam_role                           = aws_iam_role.ecs_service_role.arn
-  cluster                            = aws_ecs_cluster.default.id
-  task_definition                    = aws_ecs_task_definition.default.arn
-  desired_count                      = var.ecs_task_desired_count
-  deployment_minimum_healthy_percent = var.ecs_task_deployment_minimum_healthy_percent
-  deployment_maximum_percent         = var.ecs_task_deployment_maximum_percent
-
-  load_balancer {
-    target_group_arn = aws_alb_target_group.service_target_group.arn
-    container_name   = var.service_name
-    container_port   = var.container_port
-  }
-
-  ## Spread tasks evenly accross all Availability Zones for High Availability
-  ordered_placement_strategy {
-    type  = "spread"
-    field = "attribute:ecs.availability-zone"
-  }
-
-  ## Make use of all available space on the Container Instances
-  ordered_placement_strategy {
-    type  = "binpack"
-    field = "memory"
-  }
-
-  depends_on = [aws_alb_listener.https]
-}
-
 resource "aws_iam_role" "ecs_service_role" {
   name               = "${var.namespace}_ECS_ServiceRole_${var.environment}"
   assume_role_policy = data.aws_iam_policy_document.ecs_service_policy.json
@@ -364,64 +292,8 @@ data "aws_iam_policy_document" "ecs_service_role_policy" {
   }
 }
 
-resource "aws_ecs_task_definition" "default" {
-  family             = "${var.namespace}_ECS_TaskDefinition_${var.environment}"
-  execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
-  task_role_arn      = aws_iam_role.ecs_task_iam_role.arn
-
-  container_definitions = jsonencode([
-    {
-      name      = var.service_name
-      image     = "${module.ecr.repository_url}:${var.hash}"
-      cpu       = var.cpu_units
-      memory    = var.memory
-      essential = true
-      secrets = [
-        {
-          name      = "DB_PASSWORD",
-          valueFrom = module.secrets_manager.secret_arn
-        }
-      ]
-      environment = [
-        {
-          name  = "SECRET_KEY_BASE",
-          value = var.secret_key_base
-        },
-        {
-          name  = "DB_USERNAME",
-          value = "altabarra"
-        },
-        {
-          name  = "DB_HOST",
-          value = module.rds.db_endpoint
-        },
-        {
-          name  = "DB_NAME",
-          value = module.rds.db_name
-        }
-      ]
-
-      portMappings = [
-        {
-          containerPort = var.container_port
-          hostPort      = 0
-          protocol      = "tcp"
-        }
-      ]
-      logConfiguration = {
-        logDriver = "awslogs",
-        options = {
-          "awslogs-group"         = aws_cloudwatch_log_group.log_group.name,
-          "awslogs-region"        = var.region,
-          "awslogs-stream-prefix" = "app"
-        }
-      }
-    }
-  ])
-}
-
 resource "aws_cloudwatch_log_group" "log_group" {
-  name              = "/${lower(var.namespace)}/ecs/${var.service_name}"
+  name              = "/${lower(var.namespace)}/ec2/${var.service_name}"
   retention_in_days = var.retention_in_days
 }
 
@@ -473,108 +345,6 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
 resource "aws_iam_role" "ecs_task_iam_role" {
   name               = "${var.namespace}_ECS_TaskIAMRole_${var.environment}"
   assume_role_policy = data.aws_iam_policy_document.task_assume_role_policy.json
-}
-
-resource "aws_ecs_capacity_provider" "cas" {
-  name = "${var.namespace}_ECS_CapacityProvider_${var.environment}"
-
-  auto_scaling_group_provider {
-    auto_scaling_group_arn         = aws_autoscaling_group.ecs_autoscaling_group.arn
-    managed_termination_protection = "ENABLED"
-
-    managed_scaling {
-      maximum_scaling_step_size = var.maximum_scaling_step_size
-      minimum_scaling_step_size = var.minimum_scaling_step_size
-      status                    = "ENABLED"
-      target_capacity           = var.target_capacity
-    }
-  }
-}
-
-resource "aws_ecs_cluster_capacity_providers" "cas" {
-  cluster_name       = aws_ecs_cluster.default.name
-  capacity_providers = [aws_ecs_capacity_provider.cas.name]
-}
-
-resource "aws_appautoscaling_target" "ecs_target" {
-  max_capacity       = var.ecs_task_max_count
-  min_capacity       = var.ecs_task_min_count
-  resource_id        = "service/${aws_ecs_cluster.default.name}/${aws_ecs_service.service.name}"
-  scalable_dimension = "ecs:service:DesiredCount"
-  service_namespace  = "ecs"
-}
-
-## Policy for CPU tracking
-resource "aws_appautoscaling_policy" "ecs_cpu_policy" {
-  name               = "${var.namespace}_CPUTargetTrackingScaling_${var.environment}"
-  policy_type        = "TargetTrackingScaling"
-  resource_id        = aws_appautoscaling_target.ecs_target.resource_id
-  scalable_dimension = aws_appautoscaling_target.ecs_target.scalable_dimension
-  service_namespace  = aws_appautoscaling_target.ecs_target.service_namespace
-
-  target_tracking_scaling_policy_configuration {
-    target_value = var.cpu_target_tracking_desired_value
-
-    predefined_metric_specification {
-      predefined_metric_type = "ECSServiceAverageCPUUtilization"
-    }
-  }
-}
-
-## Policy for memory tracking
-resource "aws_appautoscaling_policy" "ecs_memory_policy" {
-  name               = "${var.namespace}_MemoryTargetTrackingScaling_${var.environment}"
-  policy_type        = "TargetTrackingScaling"
-  resource_id        = aws_appautoscaling_target.ecs_target.resource_id
-  scalable_dimension = aws_appautoscaling_target.ecs_target.scalable_dimension
-  service_namespace  = aws_appautoscaling_target.ecs_target.service_namespace
-
-  target_tracking_scaling_policy_configuration {
-    target_value = var.memory_target_tracking_desired_value
-
-    predefined_metric_specification {
-      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
-    }
-  }
-}
-
-resource "aws_autoscaling_group" "ecs_autoscaling_group" {
-  name                  = "${var.namespace}_ASG_${var.environment}"
-  max_size              = var.autoscaling_max_size
-  min_size              = var.autoscaling_min_size
-  vpc_zone_identifier   = aws_subnet.private.*.id
-  health_check_type     = "EC2"
-  protect_from_scale_in = true
-
-  enabled_metrics = [
-    "GroupMinSize",
-    "GroupMaxSize",
-    "GroupDesiredCapacity",
-    "GroupInServiceInstances",
-    "GroupPendingInstances",
-    "GroupStandbyInstances",
-    "GroupTerminatingInstances",
-    "GroupTotalInstances"
-  ]
-
-  launch_template {
-    id      = aws_launch_template.ecs_launch_template.id
-    version = "$Latest"
-  }
-
-  instance_refresh {
-    strategy = "Rolling"
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  tag {
-    key                 = "Name"
-    value               = "${var.namespace}_ASG_${var.environment}"
-    propagate_at_launch = true
-  }
 }
 
 resource "aws_alb" "alb" {
@@ -634,6 +404,20 @@ resource "aws_alb_target_group" "service_target_group" {
 
   depends_on = [aws_alb.alb]
 }
+
+resource "aws_lb_target_group" "application_tg" {
+  target_type        = "instance"
+  port               = 80
+  protocol           = "HTTP"
+  vpc_id             = aws_vpc.main.id
+   health_check {
+      healthy_threshold   = var.health_check["healthy_threshold"]
+      interval            = var.health_check["interval"]
+      unhealthy_threshold = var.health_check["unhealthy_threshold"]
+      timeout             = var.health_check["timeout"]
+      path                = var.health_check["path"]
+      port                = var.health_check["port"]
+  }}
 
 # Security Group for ALB
 resource "aws_security_group" "alb" {
@@ -777,6 +561,22 @@ resource "aws_security_group" "bastion_host" {
     to_port     = 0
     protocol    = -1
     cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_instance" "webapp_host" {
+  count                       = 1
+  ami                         = data.aws_ami.amazon_linux_2_free_tier.id
+  instance_type               = "t2.micro"
+  subnet_id                   = aws_subnet.public[0].id
+  associate_public_ip_address = true
+  key_name                    = aws_key_pair.default.id
+  vpc_security_group_ids      = [aws_security_group.ecs_instances.id]
+
+  user_data = base64encode(templatefile("./modules/ecs/user_data.sh", { ecs_cluster_name = aws_ecs_cluster.default.name }))
+
+  tags = {
+    Name = "${var.namespace}_EC2_WebHost_${var.environment}"
   }
 }
 

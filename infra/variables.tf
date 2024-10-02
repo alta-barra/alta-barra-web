@@ -234,3 +234,15 @@ variable "healthcheck_matcher" {
   type        = string
   default     = "200"
 }
+
+variable "health_check" {
+  type = map(string)
+  default = {
+    "timeout"             = "10"
+    "interval"            = "60"
+    "path"                = "/"
+    "port"                = "80"
+    "unhealthy_threshold" = "2"
+    "healthy_threshold"   = "3"
+  }
+}
