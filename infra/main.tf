@@ -26,6 +26,27 @@ data "aws_ami" "amazon_linux_2" {
   owners = ["amazon"]
 }
 
+data "aws_ami" "amazon_linux_2_free_tier" {
+  most_recent = true
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  filter {
+    name   = "owner-alias"
+    values = ["amazon"]
+  }
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"] # Free Tier eligible Amazon Linux 2 AMI
+  }
+
+  owners = ["amazon"]
+}
+
 ## Route53 Hosted Zone  ======================================================
 data "aws_route53_zone" "primary" {
   name = var.domain_name
@@ -172,7 +193,7 @@ resource "aws_key_pair" "default" {
 
 resource "aws_launch_template" "ecs_launch_template" {
   name          = "${var.namespace}_EC2_LaunchTemplate_${var.environment}"
-  image_id      = data.aws_ami.amazon_linux_2.id
+  image_id      = data.aws_ami.amazon_linux_2_free_tier.id
   instance_type = var.instance_type
   key_name      = aws_key_pair.default.key_name
 
@@ -761,8 +782,8 @@ resource "aws_security_group" "bastion_host" {
 
 resource "aws_instance" "bastion_host" {
   count                       = 0
-  ami                         = data.aws_ami.amazon_linux_2.id
-  instance_type               = "t3.micro"
+  ami                         = data.aws_ami.amazon_linux_2_free_tier.id
+  instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.public[0].id
   associate_public_ip_address = true
   key_name                    = aws_key_pair.default.id
