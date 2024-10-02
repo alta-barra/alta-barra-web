@@ -47,7 +47,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: erlef/setup-beam@v1
         with:
-          otp-version: '26'
+          otp-version: '27'
+          elixir-version: '1.17.3'
       - run: |
           mix local.hex --force
           mix deps.get
