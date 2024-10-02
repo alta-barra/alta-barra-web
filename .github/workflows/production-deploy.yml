@@ -33,7 +33,7 @@ jobs:
         working-directory: infra/deploy
         id: tofu_output
         run: |
-          echo "S3_BUCKET=$(tofu output -raw deployment_bucket_id)" >> $GITHUB_OUTPUT"
+          echo "S3_BUCKET=$(tofu output -raw s3_bucket_id)" >> $GITHUB_OUTPUT
 
   build_and_upload:
     needs: deployment_infrastructure

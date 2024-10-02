@@ -23,6 +23,10 @@ provider "aws" {
 
 resource "aws_s3_bucket" "elixir_app_bucket" {
   bucket = "alta-barra-elixir-app-deployments-bucket"
+}
+
+resource "aws_s3_bucket_acl" "example" {
+  bucket = aws_s3_bucket.elixir_app_bucket
   acl    = "private"
 }
 
