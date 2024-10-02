@@ -17,13 +17,34 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: opentofu/setup-opentofu@v1
+      - uses: actions/setup-elixir@v1
+        with:
+          otp-version: '27.0'
+          elixir-version: '1.17.3'
+      - name: Install dependencies
+        run: |
+          mix local.hex --force
+          mix deps.get
+      - name: Compile the app
+        run: mix release
+        env:
+          ENV: "PROD"
+      - name: Create tarball
+        run: |
+          tar -czf app.tar.gz -C _build/dev/rel/altabarra
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ vars.AWS_GITHUB_ROLE }}
       - name: AWS Account
         run: aws sts get-caller-identity
+      - name: Upload to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          aws s3 cp app.tar.gz s3://alta-barra-elixir-app-deployments-bucket-production/app.tar.gz
+      - uses: opentofu/setup-opentofu@v1
       - name: Deploy Infrastructure
         working-directory: ./scripts
         run: ./deploy_infrastructure.sh
@@ -41,17 +62,3 @@ jobs:
           echo "ECS_SERVICE=$(tofu output -raw ecs_service_name)" >> $GITHUB_OUTPUT
           echo "SUBNET_IDS=$(tofu output -json private_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
           echo "ECS_SECURITY_GROUP_ID=$(tofu output -raw ecs_security_group_id)" >> $GITHUB_OUTPUT
-      - name: Run Migrations
-        run: |
-          aws ecs run-task \
-            --cluster ${{ steps.tofu_output.outputs.ECS_CLUSTER }} \
-            --task-definition migration-task \
-            --network-configuration "awsvpcConfiguration={subnets=[${{ steps.tofu_output.outputs.SUBNET_IDS }}],securityGroups=[${{ steps.tofu_output.outputs.ECS_SECURITY_GROUP_ID }}]}" \
-            --launch-type FARGATE \
-            --started-by "GitHub Actions"
-      - name: Update ECS Cluster
-        run: |
-          aws ecs update-service \
-            --cluster ${{ steps.tofu_output.outputs.ECS_CLUSTER }} \
-            --service ${{ steps.tofu_output.outputs.ECS_SERVICE }} \
-            --force-new-deployment

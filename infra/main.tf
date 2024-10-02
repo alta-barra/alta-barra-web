@@ -623,7 +623,7 @@ resource "aws_instance" "elixir_app_server" {
     name = aws_iam_role.ec2_s3_access_role.name
   }
 
-  user_data = base64encode(templatefile("./modules/ecs/user_data.sh", { ecs_cluster_name = aws_ecs_cluster.default.name }))
+  user_data = base64encode(templatefile("./modules/ecs/user_data.sh", {}))
 
   tags = {
     Name = "${var.namespace}_EC2_WebHost_${var.environment}"
