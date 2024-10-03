@@ -40,31 +40,34 @@ jobs:
     name: Build and Upload
     runs-on: ubuntu-latest
     environment: production
+    env:
+      MIX_ENV: prod
     steps:
-      - uses: actions/checkout@v4
-      - name: Cache Elixir deps
-        uses: actions/cache@v3
-        with:
-          path: deps
-          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
-      - uses: erlef/setup-beam@v1
+      - name: Setup Elixir
+        uses: erlef/setup-beam@v1
         with:
           otp-version: '27'
           elixir-version: '1.17.3'
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v3
+        env:
+          cache-name: cache-elixir-deps
+        with:
+          path: deps
+          key: ${{ runner.os }}-mix-${{ env.cache-name }}-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-${{ env.cache-name }}-
       - run: |
           mix local.hex --force
           mix deps.get
           mix release
-        env:
-          MIX_ENV: "prod"
       - name: Create tarball
         run: tar -czf app.tar.gz -C _build/prod/rel/altabarra .
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ vars.AWS_REGION }}
       - run: |
           aws s3 cp app.tar.gz s3://${{ needs.deployment_infrastructure.outputs.s3_bucket }}/app-${{ github.sha }}.tar.gz
 
