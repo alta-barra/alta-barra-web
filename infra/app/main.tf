@@ -566,7 +566,6 @@ resource "aws_security_group" "bastion_host" {
 }
 
 resource "aws_instance" "elixir_app_server" {
-  count                       = 1
   ami                         = data.aws_ami.amazon_linux_2_free_tier.id
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.public[0].id
@@ -574,7 +573,7 @@ resource "aws_instance" "elixir_app_server" {
   key_name                    = aws_key_pair.default.id
   vpc_security_group_ids      = [aws_security_group.ecs_instances.id]
 
-  iam_instance_profile {
+  iam_instance_profile = {
     name = aws_iam_role.ec2_s3_access_role.name
   }
 
@@ -658,9 +657,4 @@ resource "aws_vpc_security_group_ingress_rule" "rds_from_ecs_ingress" {
   tags = {
     Name = "${var.environment}-SGR-rds-from-ecs-ingress"
   }
-}
-
-resource "aws_cloudwatch_log_group" "migration_logs" {
-  name              = "/${lower(var.namespace)}/ecs/db-migration-logs"
-  retention_in_days = 30
 }
