@@ -36,19 +36,8 @@ variable "secret_key_base" {
 }
 
 ########################################################################################################################
-## AWS credentials
+## AWS variables
 ########################################################################################################################
-
-variable "aws_access_key_id" {
-  description = "AWS console access key"
-  type        = string
-}
-
-variable "aws_secret_access_key" {
-  description = "AWS console secret access key"
-  type        = string
-}
-
 variable "region" {
   description = "AWS region"
   default     = "us-east-1"

@@ -14,6 +14,10 @@ jobs:
     name: Provision deployment Infrastructure
     runs-on: ubuntu-latest
     environment: production
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
     outputs:
       s3_bucket: ${{ steps.tofu_output.outputs.S3_BUCKET }}
     steps:
@@ -21,21 +25,13 @@ jobs:
       - uses: opentofu/setup-opentofu@v1
       - run: tofu init
         working-directory: infra/deploy
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - run: tofu apply -auto-approve
         working-directory: infra/deploy
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - name: Get Tofu Outputs
         working-directory: infra/deploy
         id: tofu_output
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
+          set -e
           tofu output -raw s3_bucket_id
           echo "S3_BUCKET=$(tofu output -raw s3_bucket_id)" >> $GITHUB_OUTPUT
 
@@ -46,6 +42,11 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v4
+      - name: Cache Elixir deps
+        uses: actions/cache@v3
+        with:
+          path: deps
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
       - uses: erlef/setup-beam@v1
         with:
           otp-version: '27'
@@ -64,31 +65,27 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      - name: Upload to S3
-        run: |
-          aws s3 cp app.tar.gz s3://${{ needs.deployment_infrastructure.outputs.s3_bucket }}/app.tar.gz
+      - run: |
+          aws s3 cp app.tar.gz s3://${{ needs.deployment_infrastructure.outputs.s3_bucket }}/app-${{ github.sha }}.tar.gz
 
   deploy_application:
     needs: [deployment_infrastructure, build_and_upload]
     name: Deploy
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
     steps:
       - uses: actions/checkout@v4
       - uses: opentofu/setup-opentofu@v1
       - run: tofu init
         working-directory: infra/app
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - run: tofu apply -auto-approve
         working-directory: infra/app
         env:
-          AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_region: ${{ vars.AWS_REGION }}
           TF_VAR_app_bucket: ${{ needs.deployment_infrastructure.outputs.s3_bucket }}
           TF_VAR_public_ec2_key: ${{ vars.PUBLIC_EC2_KEY }}
-          TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           TF_VAR_secret_key_base: ${{ secrets.PHX_SECRET_KEY_BASE }}
-          TF_VAR_hash: $(openssl rand -hex 12)
+          TF_VAR_hash: ${{ github.sha }}
