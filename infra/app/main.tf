@@ -95,14 +95,15 @@ resource "aws_internet_gateway" "default" {
 }
 
 resource "aws_subnet" "public" {
-  count                   = var.az_count
+  for_each = { for i, az in data.aws_availability_zones.available.names : az => i }
+
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = cidrsubnet(var.vpc_cidr_block, 8, var.az_count + count.index)
-  availability_zone       = data.aws_availability_zones.available.names[count.index]
+  cidr_block              = cidrsubnet(var.vpc_cidr_block, 8, var.az_count + each.value)
+  availability_zone       = each.key
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.namespace}_PublicSubnet_${count.index}_${var.environment}"
+    Name = "${var.namespace}_PublicSubnet_${each.key}_${var.environment}"
   }
 }
 
@@ -120,10 +121,12 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route_table_association" "public" {
-  count          = var.az_count
-  subnet_id      = aws_subnet.public[count.index].id
+  for_each = aws_subnet.public
+
+  subnet_id      = each.value.id
   route_table_id = aws_route_table.public.id
 }
+
 
 resource "aws_main_route_table_association" "public_main" {
   vpc_id         = aws_vpc.main.id
@@ -131,53 +134,57 @@ resource "aws_main_route_table_association" "public_main" {
 }
 
 resource "aws_eip" "nat_gateway" {
-  count  = var.az_count
-  domain = "vpc"
+  for_each = aws_subnet.public
+  domain   = "vpc"
 
   tags = {
-    Name = "${var.namespace}_EIP_${count.index}_${var.environment}"
+    Name = "${var.namespace}_EIP_${each.key}_${var.environment}"
   }
 }
 
 resource "aws_nat_gateway" "nat_gateway" {
-  count         = var.az_count
-  subnet_id     = aws_subnet.public[count.index].id
-  allocation_id = aws_eip.nat_gateway[count.index].id
+  for_each = aws_subnet.public
+
+  subnet_id     = each.value.id
+  allocation_id = aws_eip.nat_gateway[each.key].id
 
   tags = {
-    Name = "${var.namespace}_NATGateway_${count.index}_${var.environment}"
+    Name = "${var.namespace}_NATGateway_${each.key}_${var.environment}"
   }
 }
 
 resource "aws_subnet" "private" {
-  count             = var.az_count
+  for_each = { for i, az in data.aws_availability_zones.available.names : az => i }
+
   vpc_id            = aws_vpc.main.id
-  cidr_block        = cidrsubnet(var.vpc_cidr_block, 8, count.index)
-  availability_zone = data.aws_availability_zones.available.names[count.index]
+  cidr_block        = cidrsubnet(var.vpc_cidr_block, 8, each.value)
+  availability_zone = each.key
 
   tags = {
-    Name = "${var.namespace}_PrivateSubnet_${count.index}_${var.environment}"
+    Name = "${var.namespace}_PrivateSubnet_${each.key}_${var.environment}"
   }
 }
 
 resource "aws_route_table" "private" {
-  count  = var.az_count
+  for_each = aws_subnet.private
+
   vpc_id = aws_vpc.main.id
 
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat_gateway[count.index].id
+    nat_gateway_id = aws_nat_gateway.nat_gateway[each.key].id
   }
 
   tags = {
-    Name = "${var.namespace}_PrivateRouteTable_${count.index}_${var.environment}"
+    Name = "${var.namespace}_PrivateRouteTable_${each.key}_${var.environment}"
   }
 }
 
 resource "aws_route_table_association" "private" {
-  count          = var.az_count
-  subnet_id      = aws_subnet.private[count.index].id
-  route_table_id = aws_route_table.private[count.index].id
+  for_each = aws_subnet.private
+
+  subnet_id      = each.value.id
+  route_table_id = aws_route_table.private[each.key].id
 }
 
 resource "aws_key_pair" "default" {
