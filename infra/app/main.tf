@@ -239,7 +239,7 @@ module "secrets_manager" {
 
 ## RDS =======================================================================
 resource "aws_db_subnet_group" "default" {
-  subnet_ids = aws_subnet.private.*.id
+  subnet_ids = [for subnet in aws_subnet.private : subnet.id]
 
   tags = {
     Name = "${var.namespace}_db_subnet_group_${var.environment}"
@@ -357,7 +357,7 @@ resource "aws_iam_role" "ecs_task_iam_role" {
 resource "aws_alb" "alb" {
   name            = "${var.namespace}-ALB-${var.environment}"
   security_groups = [aws_security_group.alb.id]
-  subnets         = aws_subnet.public.*.id
+  subnets         = [for subnet in aws_subnet.public : subnet.id]
 }
 
 resource "aws_alb_listener" "https" {
@@ -628,7 +628,7 @@ resource "aws_instance" "elixir_app_server" {
   count                       = 1
   ami                         = data.aws_ami.amazon_linux_2_free_tier.id
   instance_type               = "t2.micro"
-  subnet_id                   = aws_subnet.public[0].id
+  subnet_id                   = values(aws_subnet.public)[0].id # TODO change this if more are needed
   associate_public_ip_address = true
   key_name                    = aws_key_pair.default.id
   vpc_security_group_ids      = [aws_security_group.ecs_instances.id]
@@ -645,7 +645,7 @@ resource "aws_instance" "bastion_host" {
   count                       = 0
   ami                         = data.aws_ami.amazon_linux_2_free_tier.id
   instance_type               = "t2.micro"
-  subnet_id                   = aws_subnet.public[0].id
+  subnet_id                   = values(aws_subnet.public)[0].id
   associate_public_ip_address = true
   key_name                    = aws_key_pair.default.id
   vpc_security_group_ids      = [aws_security_group.bastion_host.id]
