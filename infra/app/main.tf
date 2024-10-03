@@ -586,9 +586,9 @@ resource "aws_iam_role" "ec2_s3_access_role" {
   })
 }
 
-resource "aws_iam_policy" "s3_access_policy" {
-  name        = "s3_access_policy"
-  description = "Allow EC2 instances to access S3 bucket"
+resource "aws_iam_policy" "s3_and_secrets_access_policy" {
+  name        = "s3_and_secrets_access_policy"
+  description = "Allow EC2 instances to access S3 bucket and Secrets Manager"
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -600,13 +600,21 @@ resource "aws_iam_policy" "s3_access_policy" {
           "${data.aws_s3_bucket.elixir_app_bucket.arn}/*",
         ],
       },
+      {
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:ListSecrets"
+        ],
+        Effect   = "Allow",
+        Resource = "*"
+      }
     ],
   })
 }
 
 resource "aws_iam_role_policy_attachment" "ec2_attach_s3_access" {
   role       = aws_iam_role.ec2_s3_access_role.name
-  policy_arn = aws_iam_policy.s3_access_policy.arn
+  policy_arn = aws_iam_policy.s3_and_secrets_access_policy.arn
 }
 
 resource "aws_instance" "elixir_app_server" {
@@ -617,10 +625,7 @@ resource "aws_instance" "elixir_app_server" {
   associate_public_ip_address = true
   key_name                    = aws_key_pair.default.id
   vpc_security_group_ids      = [aws_security_group.ecs_instances.id]
-
-  iam_instance_profile = {
-    name = aws_iam_role.ec2_s3_access_role.name
-  }
+  iam_instance_profile        = aws_iam_role.ec2_s3_access_role.name
 
   user_data = base64encode(templatefile("./modules/ecs/user_data.sh", { sha_hash = var.hash, app_bucket = var.app_bucket }))
 
