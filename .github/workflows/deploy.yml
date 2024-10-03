@@ -1,9 +1,8 @@
-name: Deploy Production Environment
+name: Deploy Elixir App
 
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
 
 permissions:
   id-token: write
