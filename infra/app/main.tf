@@ -5,27 +5,6 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
-data "aws_ami" "amazon_linux_2" {
-  most_recent = true
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  filter {
-    name   = "owner-alias"
-    values = ["amazon"]
-  }
-
-  filter {
-    name   = "name"
-    values = ["amzn2-ami-ecs-hvm-*-x86_64-ebs"]
-  }
-
-  owners = ["amazon"]
-}
-
 data "aws_ami" "amazon_linux_2_free_tier" {
   most_recent = true
 
@@ -48,31 +27,10 @@ data "aws_ami" "amazon_linux_2_free_tier" {
 }
 
 ## Route53 Hosted Zone  ======================================================
-data "aws_route53_zone" "primary" {
-  name = var.domain_name
-}
-
-resource "aws_acm_certificate" "cert" {
-  domain_name               = var.domain_name
-  validation_method         = "DNS"
-  subject_alternative_names = ["*.${var.domain_name}"]
-
-  tags = {
-    Name = "${var.namespace}-certificate"
-  }
-}
-
-resource "aws_acm_certificate_validation" "cert_validation" {
-  certificate_arn         = aws_acm_certificate.cert.arn
-  validation_record_fqdns = [aws_route53_record.generic_certificate_validation.fqdn]
-}
-
-resource "aws_route53_record" "generic_certificate_validation" {
-  name    = tolist(aws_acm_certificate.cert.domain_validation_options)[0].resource_record_name
-  type    = tolist(aws_acm_certificate.cert.domain_validation_options)[0].resource_record_type
-  zone_id = data.aws_route53_zone.primary.id
-  records = [tolist(aws_acm_certificate.cert.domain_validation_options)[0].resource_record_value]
-  ttl     = 300
+module "route_53" {
+  source      = "./modules/route_53/"
+  domain_name = var.domain_name
+  namespace   = var.namespace
 }
 
 ## Networking ================================================================
