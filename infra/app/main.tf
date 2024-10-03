@@ -618,7 +618,7 @@ resource "aws_instance" "elixir_app_server" {
   key_name                    = aws_key_pair.default.id
   vpc_security_group_ids      = [aws_security_group.ecs_instances.id]
 
-  iam_instance_profile {
+  iam_instance_profile = {
     name = aws_iam_role.ec2_s3_access_role.name
   }
 
