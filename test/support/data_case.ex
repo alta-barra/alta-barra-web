@@ -37,7 +37,12 @@ defmodule Altabarra.DataCase do
   """
   def setup_sandbox(tags) do
     pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Altabarra.Repo, shared: not tags[:async])
-    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+
+    on_exit(fn ->
+      # HACK this prevents DB connections from closing too soon
+      Process.sleep(10)
+      Ecto.Adapters.SQL.Sandbox.stop_owner(pid)
+    end)
   end
 
   @doc """

@@ -1,5 +1,5 @@
 defmodule Altabarra.AnalyticsTest do
-  use Altabarra.DataCase
+  use Altabarra.DataCase, async: true
 
   alias Altabarra.Analytics
 
@@ -21,7 +21,13 @@ defmodule Altabarra.AnalyticsTest do
     end
 
     test "create_page_view/1 with valid data creates a page_view" do
-      valid_attrs = %{timestamp: ~N[2024-09-29 17:39:00], url: "some url", user_agent: "some user_agent", ip_address: "some ip_address", referer: "some referer"}
+      valid_attrs = %{
+        timestamp: ~N[2024-09-29 17:39:00],
+        url: "some url",
+        user_agent: "some user_agent",
+        ip_address: "some ip_address",
+        referer: "some referer"
+      }
 
       assert {:ok, %PageView{} = page_view} = Analytics.create_page_view(valid_attrs)
       assert page_view.timestamp == ~N[2024-09-29 17:39:00]
@@ -37,7 +43,14 @@ defmodule Altabarra.AnalyticsTest do
 
     test "update_page_view/2 with valid data updates the page_view" do
       page_view = page_view_fixture()
-      update_attrs = %{timestamp: ~N[2024-09-30 17:39:00], url: "some updated url", user_agent: "some updated user_agent", ip_address: "some updated ip_address", referer: "some updated referer"}
+
+      update_attrs = %{
+        timestamp: ~N[2024-09-30 17:39:00],
+        url: "some updated url",
+        user_agent: "some updated user_agent",
+        ip_address: "some updated ip_address",
+        referer: "some updated referer"
+      }
 
       assert {:ok, %PageView{} = page_view} = Analytics.update_page_view(page_view, update_attrs)
       assert page_view.timestamp == ~N[2024-09-30 17:39:00]

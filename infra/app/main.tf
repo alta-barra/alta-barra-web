@@ -322,7 +322,7 @@ resource "aws_alb_listener" "https" {
   load_balancer_arn = aws_alb.alb.arn
   port              = "443"
   protocol          = "HTTPS"
-  certificate_arn   = aws_acm_certificate.cert.arn
+  certificate_arn   = module.route_53.certificate_arn
   ssl_policy        = "ELBSecurityPolicy-2016-08"
 
   default_action {
@@ -330,7 +330,7 @@ resource "aws_alb_listener" "https" {
     target_group_arn = aws_alb_target_group.service_target_group.arn
   }
 
-  depends_on = [aws_acm_certificate.cert, aws_acm_certificate_validation.cert_validation]
+  depends_on = [module.route_53]
 }
 
 resource "aws_alb_listener" "http_redirect_to_https" {
@@ -614,9 +614,9 @@ resource "aws_instance" "bastion_host" {
 }
 
 resource "aws_route53_record" "www" {
-  name    = var.domain_name
+  name    = module.route_53.name
   type    = "A"
-  zone_id = data.aws_route53_zone.primary.zone_id
+  zone_id = module.route_53.zone_id
 
   alias {
     name                   = aws_alb.alb.dns_name

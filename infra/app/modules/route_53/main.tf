@@ -23,7 +23,7 @@ resource "aws_acm_certificate" "this" {
 }
 
 resource "aws_acm_certificate_validation" "this" {
-  certificate_arn         = aws_acm_certificate.cert.arn
+  certificate_arn         = aws_acm_certificate.this.arn
   validation_record_fqdns = [aws_route53_record.generic_certificate_validation.fqdn]
 }
 
@@ -33,4 +33,16 @@ resource "aws_route53_record" "generic_certificate_validation" {
   zone_id = data.aws_route53_zone.this.id
   records = [tolist(aws_acm_certificate.this.domain_validation_options)[0].resource_record_value]
   ttl     = 300
+}
+
+output "certificate_arn" {
+  value = aws_acm_certificate.this.arn
+}
+
+output "zone_id" {
+  value = data.aws_route53_zone.this.zone_id
+}
+
+output "name" {
+  value = data.aws_route53_zone.this.name
 }

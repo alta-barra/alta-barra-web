@@ -6,8 +6,8 @@ defmodule Altabarra.Analytics do
   import Ecto.Query, warn: false
   alias Altabarra.Repo
 
+  alias Altabarra.Accounts.{User, UserToken}
   alias Altabarra.Analytics.PageView
-  alias Altabarra.Accounts
 
   @doc """
   Returns the list of page_views.
@@ -174,7 +174,7 @@ defmodule Altabarra.Analytics do
   def get_new_users(days) do
     start_date = DateTime.utc_now() |> DateTime.add(-days, :day)
 
-    Accounts.User
+    User
     |> where([u], u.inserted_at >= ^start_date)
     |> select([u], count(u.id))
     |> Repo.one()
@@ -183,7 +183,7 @@ defmodule Altabarra.Analytics do
   def get_active_users(days) do
     cutoff_time = DateTime.utc_now() |> DateTime.add(-days, :day)
 
-    Accounts.UserToken
+    UserToken
     |> where([t], t.inserted_at >= ^cutoff_time)
     |> select([t], t.user_id)
     |> distinct(true)
