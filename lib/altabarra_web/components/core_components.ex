@@ -17,7 +17,7 @@ defmodule AltabarraWeb.CoreComponents do
   use Phoenix.Component
 
   alias Phoenix.LiveView.JS
-  import AltabarraWeb.Gettext
+  use Gettext, backend: MyApp.Gettext
 
   @doc """
   Renders a modal.

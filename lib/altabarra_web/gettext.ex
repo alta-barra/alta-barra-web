@@ -20,5 +20,5 @@ defmodule AltabarraWeb.Gettext do
 
   See the [Gettext Docs](https://hexdocs.pm/gettext) for detailed usage.
   """
-  use Gettext, otp_app: :altabarra
+  use Gettext.Backend, otp_app: :altabarra
 end

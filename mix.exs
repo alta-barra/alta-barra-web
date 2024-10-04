@@ -41,7 +41,7 @@ defmodule Altabarra.MixProject do
       {:postgrex, ">= 0.0.0"},
 
       # Authentication
-      {:bcrypt_elixir, "~> 3.0"},
+      {:bcrypt_elixir, "~> 3.2"},
 
       # Asset compilation
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
