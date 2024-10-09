@@ -94,10 +94,6 @@ module "ecs_service" {
     }
   }
 
-  volume = {
-    my-vol = {}
-  }
-
   # Container definition(s)
   container_definitions = {
     (local.container_name) = {
@@ -117,14 +113,15 @@ module "ecs_service" {
         },
         {
           name  = "DB_PASSWORD",
-          value = "altabarra"
-        }
-      ]
-
-      mount_points = [
+          value = module.secrets_manager.secret_string
+        },
         {
-          sourceVolume  = "my-vol",
-          containerPath = "/var/www/my-vol"
+          name  = "DB_HOST",
+          value = module.rds.db_endpoint
+        },
+        {
+          name  = "DB_NAME",
+          value = module.rds.db_name
         }
       ]
 
@@ -328,4 +325,35 @@ module "vpc" {
   single_nat_gateway = true
 
   tags = local.tags
+}
+
+
+module "kms" {
+  source    = "./modules/kms"
+  namespace = var.namespace
+}
+
+module "secrets_manager" {
+  source      = "./modules/secrets_manager/"
+  secret_name = "${var.namespace}/${var.environment}/db_password"
+  kms_key_id  = module.kms.key_id
+  description = "Password for RDS"
+  environment = var.environment
+  namespace   = var.namespace
+}
+
+resource "aws_db_subnet_group" "default" {
+  subnet_ids = aws_subnet.private.*.id
+
+  tags = {
+    Name = "${var.namespace}_db_subnet_group_${var.environment}"
+  }
+}
+
+module "rds" {
+  source = "./modules/rds"
+
+  db_password            = module.secrets_manager.secret_string
+  db_subnet_group_name   = aws_db_subnet_group.default.name
+  vpc_security_group_ids = [aws_security_group.rds.id]
 }
