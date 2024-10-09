@@ -101,7 +101,7 @@ module "ecs_service" {
   # Container definition(s)
   container_definitions = {
     (local.container_name) = {
-      image = "${module.ecr.repository_url}/alta-barra-webapp:latest"
+      image = "${module.ecr.repository_url}/alta-barra-webapp:${var.hash}"
       port_mappings = [
         {
           name          = local.container_name
