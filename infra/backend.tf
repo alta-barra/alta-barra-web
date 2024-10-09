@@ -1,13 +1,4 @@
 terraform {
-  required_version = ">= 1.0.0"
-
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5"
-    }
-  }
-
   backend "s3" {
     encrypt        = true
     bucket         = "alta-barra-iac"
@@ -16,3 +7,4 @@ terraform {
     dynamodb_table = "terraform-state-lock-dynamo"
   }
 }
+

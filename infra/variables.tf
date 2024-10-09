@@ -1,7 +1,6 @@
 ########################################################################################################################
 ## Service variables
 ########################################################################################################################
-
 variable "namespace" {
   description = "Namespace for resource names"
   default     = "AltaBarra"
@@ -18,20 +17,19 @@ variable "service_name" {
   type        = string
 }
 
-variable "scenario" {
-  description = "Scenario name for tags"
-  default     = "scenario-ecs-ec2"
+variable "environment" {
+  description = "Environment for deployment (like dev or staging)"
   type        = string
 }
 
-variable "environment" {
-  description = "Environment for deployment (like dev or staging)"
-  default     = "dev"
-  type        = string
+variable "common_tags" {
+  type        = map(string)
+  default     = {}
+  description = "Base tags applied to all resources"
 }
 
 variable "secret_key_base" {
-  description = "Phoenix ecto secret key"
+  description = "Phoenix secret key"
   type        = string
 }
 
@@ -55,14 +53,7 @@ variable "tld_zone_id" {
 
 variable "vpc_cidr_block" {
   description = "CIDR block for the VPC network"
-  default     = "10.1.0.0/16"
   type        = string
-}
-
-variable "az_count" {
-  description = "Describes how many availability zones are used"
-  default     = 2
-  type        = number
 }
 
 ########################################################################################################################
@@ -78,69 +69,6 @@ variable "instance_type" {
   description = "Instance type for EC2"
   default     = "t3.micro"
   type        = string
-}
-
-########################################################################################################################
-## ECS variables
-########################################################################################################################
-
-variable "ecs_task_desired_count" {
-  description = "How many ECS tasks should run in parallel"
-  type        = number
-}
-
-variable "ecs_task_min_count" {
-  description = "How many ECS tasks should minimally run in parallel"
-  default     = 1
-  type        = number
-}
-
-variable "ecs_task_max_count" {
-  description = "How many ECS tasks should maximally run in parallel"
-  default     = 3
-  type        = number
-}
-
-variable "ecs_task_deployment_minimum_healthy_percent" {
-  description = "How many percent of a service must be running to still execute a safe deployment ()"
-  default     = 100
-  type        = number
-}
-
-variable "ecs_task_deployment_maximum_percent" {
-  description = "How many additional tasks are allowed to run (in percent) while a deployment is executed (100% vs 200%)"
-  default     = 200
-  type        = number
-}
-
-variable "cpu_target_tracking_desired_value" {
-  description = "Target tracking for CPU usage in %"
-  default     = 70
-  type        = number
-}
-
-variable "memory_target_tracking_desired_value" {
-  description = "Target tracking for memory usage in %"
-  default     = 80
-  type        = number
-}
-
-variable "maximum_scaling_step_size" {
-  description = "Maximum amount of EC2 instances that should be added on scale-out"
-  default     = 3
-  type        = number
-}
-
-variable "minimum_scaling_step_size" {
-  description = "Minimum amount of EC2 instances that should be added on scale-out"
-  default     = 1
-  type        = number
-}
-
-variable "target_capacity" {
-  description = "Amount of resources of container instances that should be used for task placement in %"
-  default     = 100
-  type        = number
 }
 
 variable "container_port" {
@@ -181,62 +109,18 @@ variable "ecr_force_delete" {
   type        = bool
 }
 
-variable "hash" {
-  description = "Task hash that simulates a unique version for every new deployment of the ECS Task"
-  type        = string
-}
-
 ########################################################################################################################
 ## Autoscaling Group
 ########################################################################################################################
 
 variable "autoscaling_max_size" {
   description = "Max size of the autoscaling group"
-  default     = 6
+  default     = 5
   type        = number
 }
 
 variable "autoscaling_min_size" {
   description = "Min size of the autoscaling group"
-  default     = 2
+  default     = 1
   type        = number
-}
-
-########################################################################################################################
-## ALB
-########################################################################################################################
-
-variable "custom_origin_host_header" {
-  description = "Custom header to ensure communication only through CloudFront"
-  default     = "AltaBarra_CF"
-  type        = string
-}
-
-variable "healthcheck_endpoint" {
-  description = "Endpoint for ALB healthcheck"
-  type        = string
-  default     = "/status"
-}
-
-variable "healthcheck_matcher" {
-  description = "HTTP status code matcher for healthcheck"
-  type        = string
-  default     = "200"
-}
-
-variable "health_check" {
-  type = map(string)
-  default = {
-    "timeout"             = "10"
-    "interval"            = "60"
-    "path"                = "/"
-    "port"                = "80"
-    "unhealthy_threshold" = "2"
-    "healthy_threshold"   = "3"
-  }
-}
-
-variable "app_bucket" {
-  type        = string
-  description = "S3 bucket where the app.tar.gz is."
 }

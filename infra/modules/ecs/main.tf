@@ -1,5 +1,5 @@
 ## Data ======================================================================
-data "aws_ami" "amazon_linux_2" {
+data "aws_ami" "amazon_linux_2_free_tier" {
   most_recent = true
 
   filter {
@@ -14,7 +14,7 @@ data "aws_ami" "amazon_linux_2" {
 
   filter {
     name   = "name"
-    values = ["amzn2-ami-ecs-hvm-*-x86_64-ebs"]
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"] # Free Tier eligible Amazon Linux 2 AMI
   }
 
   owners = ["amazon"]
@@ -180,9 +180,9 @@ resource "aws_ecs_cluster" "this" {
 }
 
 resource "aws_launch_template" "ecs" {
-  image_id      = data.aws_ami.amazon_linux_2.id
+  image_id      = data.aws_ami.amazon_linux_2_free_tier.id
   name_prefix   = "ecs-${var.name}"
-  instance_type = var.instance_type
+  instance_type = "t2.micro"
 
   iam_instance_profile {
     name = aws_iam_instance_profile.ec2_profile.name
@@ -250,14 +250,14 @@ resource "aws_ecs_task_definition" "this" {
 
   container_definitions = jsonencode([
     {
-      name      = var.service_name
+      name      = "migration-task"
       image     = "${aws_ecr_repository.ecr.repository_url}:${var.hash}"
-      cpu       = var.cpu_units
-      memory    = var.memory
+      cpu       = 256
+      memory    = 512
       essential = true
       portMappings = [
         {
-          containerPort = var.container_port
+          containerPort = 4000
           hostPort      = 0
           protocol      = "tcp"
         }
@@ -266,7 +266,7 @@ resource "aws_ecs_task_definition" "this" {
         logDriver = "awslogs",
         options = {
           "awslogs-group"         = aws_cloudwatch_log_group.log_group.name,
-          "awslogs-region"        = var.region,
+          "awslogs-region"        = "us-east-1"
           "awslogs-stream-prefix" = "app"
         }
       }

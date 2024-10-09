@@ -9,58 +9,15 @@ permissions:
   contents: read
 
 jobs:
-  deployment_infrastructure:
-    name: Provision deployment Infrastructure
-    runs-on: ubuntu-latest
-    environment: production
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
-    outputs:
-      s3_bucket: ${{ steps.tofu_output.outputs.S3_BUCKET }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: opentofu/setup-opentofu@v1
-      - run: tofu init
-        working-directory: infra/deploy
-      - run: tofu apply -auto-approve
-        working-directory: infra/deploy
-      - name: Get Tofu Outputs
-        working-directory: infra/deploy
-        id: tofu_output
-        run: |
-          set -e
-          tofu output -raw s3_bucket_id
-          echo "S3_BUCKET=$(tofu output -raw s3_bucket_id)" >> $GITHUB_OUTPUT
-
   build_and_upload:
-    needs: [deployment_infrastructure]
     name: Build and Upload
     runs-on: ubuntu-latest
     environment: production
     env:
       MIX_ENV: prod
     steps:
-      - name: Setup Elixir
-        uses: erlef/setup-beam@v1
-        with:
-          otp-version: '27'
-          elixir-version: '1.17.3'
       - uses: actions/checkout@v4
-      - uses: actions/cache@v3
-        env:
-          cache-name: cache-elixir-deps
-        with:
-          path: deps
-          key: ${{ runner.os }}-mix-${{ env.cache-name }}-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-${{ env.cache-name }}-
-      - run: |
-          mix local.hex --force
-          mix deps.get
-          mix release
-      - name: Create tarball
-        run: tar -czf app.tar.gz -C _build/prod/rel/altabarra .
+      - uses: opentofu/setup-opentofu@v1
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -68,26 +25,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.AWS_REGION }}
       - run: |
-          aws s3 cp app.tar.gz s3://${{ needs.deployment_infrastructure.outputs.s3_bucket }}/app-${{ github.sha }}.tar.gz
-
-  deploy_application:
-    needs: [deployment_infrastructure, build_and_upload]
-    name: Deploy
-    runs-on: ubuntu-latest
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: ${{ vars.AWS_REGION }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: opentofu/setup-opentofu@v1
-      - run: tofu init
-        working-directory: infra/app
-      - run: tofu apply -auto-approve
-        working-directory: infra/app
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 278803536744.dkr.ecr.us-east-1.amazonaws.com
+            docker build -t alta-barra-webapp .
+            docker tag alta-barra-webapp:latest 278803536744.dkr.ecr.us-east-1.amazonaws.com/alta-barra-webapp:latest
+            docker push 278803536744.dkr.ecr.us-east-1.amazonaws.com/alta-barra-webapp:latest
+      - run: ./apply.sh production apply
+        working-directory: infra/scripts
         env:
-          TF_VAR_region: ${{ vars.AWS_REGION }}
-          TF_VAR_app_bucket: ${{ needs.deployment_infrastructure.outputs.s3_bucket }}
           TF_VAR_public_ec2_key: ${{ vars.PUBLIC_EC2_KEY }}
           TF_VAR_secret_key_base: ${{ secrets.PHX_SECRET_KEY_BASE }}
           TF_VAR_hash: ${{ github.sha }}
