@@ -69,11 +69,6 @@ module "ecs" {
         status                    = "ENABLED"
         target_capacity           = 60
       }
-
-      default_capacity_provider_strategy = {
-        weight = 60
-        base   = 20
-      }
     }
   }
 }
@@ -117,11 +112,11 @@ module "ecs_service" {
         },
         {
           name  = "DB_HOST",
-          value = module.rds.db_endpoint
+          value = module.rds.db_instance_endpoint
         },
         {
           name  = "DB_NAME",
-          value = module.rds.db_name
+          value = "altabarra_db"
         }
       ]
 
@@ -317,9 +312,12 @@ module "vpc" {
   name = local.name
   cidr = local.vpc_cidr
 
-  azs             = local.azs
-  private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 4, k)]
-  public_subnets  = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k + 48)]
+  azs              = local.azs
+  private_subnets  = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 4, k)]
+  public_subnets   = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k + 48)]
+  database_subnets = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k + 128)]
+
+  create_database_subnet_group = true
 
   enable_nat_gateway = true
   single_nat_gateway = true
@@ -342,18 +340,54 @@ module "secrets_manager" {
   namespace   = var.namespace
 }
 
-resource "aws_db_subnet_group" "default" {
-  subnet_ids = aws_subnet.private.*.id
+module "rds" {
+  source  = "terraform-aws-modules/rds/aws"
+  version = "6.9.0"
 
-  tags = {
-    Name = "${var.namespace}_db_subnet_group_${var.environment}"
-  }
+  identifier = "alta-barra-db"
+
+  engine                   = "postgres"
+  engine_version           = "14"
+  engine_lifecycle_support = "open-source-rds-extended-support-disabled"
+  family                   = "postgres14" # DB parameter group
+  major_engine_version     = "14"         # DB option group
+  instance_class           = "db.t4g.micro"
+
+  allocated_storage = 20
+
+  db_name  = "altabarra_db"
+  username = "altabarra"
+  port     = 5432
+
+  db_subnet_group_name   = module.vpc.database_subnet_group
+  vpc_security_group_ids = [module.security_group.security_group_id]
+
+  maintenance_window      = "Mon:00:00-Mon:03:00"
+  backup_window           = "03:00-06:00"
+  backup_retention_period = 0
+
+  tags = local.tags
 }
 
-module "rds" {
-  source = "./modules/rds"
 
-  db_password            = module.secrets_manager.secret_string
-  db_subnet_group_name   = aws_db_subnet_group.default.name
-  vpc_security_group_ids = [aws_security_group.rds.id]
+module "security_group" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "~> 5.0"
+
+  name        = local.name
+  description = "Complete PostgreSQL example security group"
+  vpc_id      = module.vpc.vpc_id
+
+  # ingress
+  ingress_with_cidr_blocks = [
+    {
+      from_port   = 5432
+      to_port     = 5432
+      protocol    = "tcp"
+      description = "PostgreSQL access from within VPC"
+      cidr_blocks = module.vpc.vpc_cidr_block
+    },
+  ]
+
+  tags = local.tags
 }
