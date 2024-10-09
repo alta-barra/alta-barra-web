@@ -175,6 +175,12 @@ module "alb" {
       to_port     = 80
       ip_protocol = "tcp"
       cidr_ipv4   = "0.0.0.0/0"
+    },
+    all_https = {
+      from_port   = 443
+      to_port     = 443
+      ip_protocol = "tcp"
+      cidr_ipv4   = "0.0.0.0/0"
     }
   }
   security_group_egress_rules = {
@@ -192,7 +198,16 @@ module "alb" {
       forward = {
         target_group_key = "ex_ecs"
       }
+    },
+    https = {
+      port     = 443
+      protocol = "HTTP"
+
+      forward = {
+        target_group_key = "ex_ecs"
+      }
     }
+
   }
 
   target_groups = {
