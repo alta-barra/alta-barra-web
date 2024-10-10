@@ -63,6 +63,9 @@ COPY config/runtime.exs config/
 COPY rel rel
 RUN mix release
 
+RUN mkdir -p /etc/ssl/certs
+COPY assets/ca-certfile.crt /etc/ssl/certs/ca-certfile.crt
+
 # start a new build stage so that the final image will only contain
 # the compiled release and other runtime necessities
 FROM ${RUNNER_IMAGE}
@@ -86,6 +89,8 @@ ENV MIX_ENV="prod"
 
 # Only copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/altabarra ./
+RUN mkdir -p /etc/ssl/certs
+COPY --from=builder --chown=nobody:root /etc/ssl/certs/ca-certificate.crt /etc/ssl/certs/ca-certificate.crt
 
 USER nobody
 
