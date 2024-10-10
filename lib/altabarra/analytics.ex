@@ -3,6 +3,7 @@ defmodule Altabarra.Analytics do
   The Analytics context.
   """
 
+  import Logger
   import Ecto.Query, warn: false
   alias Altabarra.Repo
 
@@ -128,6 +129,8 @@ defmodule Altabarra.Analytics do
   end
 
   def track_page_view(conn) do
+    Logger.debug("Request headers: #{inspect(conn.req_headers)}")
+
     %{
       url: conn.request_path,
       user_agent: get_user_agent(conn),
