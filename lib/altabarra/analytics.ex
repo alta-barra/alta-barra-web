@@ -129,7 +129,7 @@ defmodule Altabarra.Analytics do
   end
 
   def track_page_view(conn) do
-    Logger.debug("Request headers: #{inspect(conn.req_headers)}")
+    debug("Request headers: #{inspect(conn.req_headers)}")
 
     %{
       url: conn.request_path,

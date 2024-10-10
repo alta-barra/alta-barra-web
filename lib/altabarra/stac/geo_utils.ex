@@ -1,4 +1,12 @@
 defmodule Altabarra.Stac.GeoUtils do
+
+  @max_latitude 90
+  @min_latitude -90
+  @max_longitude 180
+  @min_longitude -180
+
+  @delta 0.0001
+
   @doc """
   Converts a single point to a minimal bounding box.
   The bounding box is created by adding and subtracting a small delta
@@ -12,7 +20,7 @@ defmodule Altabarra.Stac.GeoUtils do
   ## Returns
     A list representing the bounding box: [west, south, east, north]
   """
-  def point_to_bbox(lat, lon, delta \\ 0.0001) do
+  def point_to_bbox(lat, lon, delta \\ @delta) do
     [
       # west
       lon - delta,
@@ -43,7 +51,7 @@ defmodule Altabarra.Stac.GeoUtils do
     end
   end
 
-  defp process_points(points) when is_list(points) and length(points) > 0 do
+  defp process_points(points) do
     if length(points) == 1 do
       # Single point case
       [{latitude, _}, {longitude, _}] =
@@ -59,9 +67,7 @@ defmodule Altabarra.Stac.GeoUtils do
     end
   end
 
-  defp process_points(_), do: nil
-
-  defp process_lines(lines) when is_list(lines) and length(lines) > 0 do
+  defp process_lines(lines) do
     # Flatten the list of lines into a single list of points
     points = Enum.flat_map(lines, fn line ->
       line
@@ -77,11 +83,9 @@ defmodule Altabarra.Stac.GeoUtils do
     [%{"lon" => lon1, "lat" => lat1}, %{"lon" => lon2, "lat" => lat2}]
   end
 
-  defp process_lines(_), do: nil
-
-  defp process_bboxes(bboxes) when is_list(bboxes) and length(bboxes) > 0 do
+  defp process_bboxes(bboxes) do
     # Initial bounding box covering the whole world S W N E
-    initial_bbox = [-180, -90, 180, 90]
+    initial_bbox = [@min_longitude, @min_latitude, @max_longitude, @max_latitude]
 
     Enum.reduce(bboxes, initial_bbox, fn box_string, acc ->
       bbox =
@@ -96,22 +100,20 @@ defmodule Altabarra.Stac.GeoUtils do
 
       [
         # south
-        min(Enum.at(bbox, 1, -90), Enum.at(acc, 1)),
+        min(Enum.at(bbox, 1, @min_latitude), Enum.at(acc, 1)),
         # west
-        max(Enum.at(bbox, 0, -180), Enum.at(acc, 0)),
+        max(Enum.at(bbox, 0, @min_longitude), Enum.at(acc, 0)),
         # north
-        min(Enum.at(bbox, 3, 90), Enum.at(acc, 3)),
+        min(Enum.at(bbox, 3, @max_latitude), Enum.at(acc, 3)),
         # east
-        min(Enum.at(bbox, 2, 180), Enum.at(acc, 2))
+        min(Enum.at(bbox, 2, @max_longitude), Enum.at(acc, 2))
       ]
     end)
   end
 
-  defp process_bboxes(_), do: nil
-
   defp calculate_bbox_from_points(points) do
     {min_lon, min_lat, max_lon, max_lat} =
-      Enum.reduce(points, {180, 90, -180, -90}, fn point, {min_lon, min_lat, max_lon, max_lat} ->
+      Enum.reduce(points, {@max_longitude, @max_latitude, @min_longitude, @min_latitude}, fn point, {min_lon, min_lat, max_lon, max_lat} ->
         {
           min(min_lon, point["lon"]),
           min(min_lat, point["lat"]),
