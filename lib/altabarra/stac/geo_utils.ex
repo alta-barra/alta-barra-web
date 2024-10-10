@@ -73,7 +73,7 @@ defmodule Altabarra.Stac.GeoUtils do
     calculate_bbox_from_points(points)
   end
 
-  defp to_points([lat1, lon1, lat2, lon2]) do
+  defp to_points([lon1, lat1, lon2, lat2]) do
     [%{"lon" => lon1, "lat" => lat1}, %{"lon" => lon2, "lat" => lat2}]
   end
 
@@ -81,7 +81,7 @@ defmodule Altabarra.Stac.GeoUtils do
 
   defp process_bboxes(bboxes) when is_list(bboxes) and length(bboxes) > 0 do
     # Initial bounding box covering the whole world S W N E
-    initial_bbox = [-90, -180, 90, 180]
+    initial_bbox = [-180, -90, 180, 90]
 
     Enum.reduce(bboxes, initial_bbox, fn box_string, acc ->
       bbox =
@@ -96,13 +96,13 @@ defmodule Altabarra.Stac.GeoUtils do
 
       [
         # south
-        max(Enum.at(bbox, 0, -90), Enum.at(acc, 0)),
+        min(Enum.at(bbox, 1, -90), Enum.at(acc, 1)),
         # west
-        max(Enum.at(bbox, 1, -180), Enum.at(acc, 1)),
+        max(Enum.at(bbox, 0, -180), Enum.at(acc, 0)),
         # north
-        min(Enum.at(bbox, 2, 90), Enum.at(acc, 2)),
+        min(Enum.at(bbox, 3, 90), Enum.at(acc, 3)),
         # east
-        min(Enum.at(bbox, 3, 180), Enum.at(acc, 3))
+        min(Enum.at(bbox, 2, 180), Enum.at(acc, 2))
       ]
     end)
   end
