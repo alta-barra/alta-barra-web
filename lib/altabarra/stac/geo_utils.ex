@@ -63,8 +63,18 @@ defmodule Altabarra.Stac.GeoUtils do
 
   defp process_lines(lines) when is_list(lines) and length(lines) > 0 do
     # Flatten the list of lines into a single list of points
-    points = Enum.flat_map(lines, fn line -> line end)
+    points = Enum.flat_map(lines, fn line ->
+      line
+      |> String.split()
+      |> Enum.map(&String.to_float/1)
+      |> to_points()
+    end)
+
     calculate_bbox_from_points(points)
+  end
+
+  defp to_points([lat1, lon1, lat2, lon2]) do
+    [%{"lon" => lon1, "lat" => lat1}, %{"lon" => lon2, "lat" => lat2}]
   end
 
   defp process_lines(_), do: nil

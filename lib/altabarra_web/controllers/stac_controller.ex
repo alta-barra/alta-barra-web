@@ -3,6 +3,8 @@ defmodule AltabarraWeb.StacController do
 
   alias Altabarra.Stac.CMRSearch, as: Stac
 
+  @cmr_page_size_max 2000
+
   def root_catalog(conn, _params) do
     base_url = get_base_url(conn)
 
@@ -55,7 +57,7 @@ defmodule AltabarraWeb.StacController do
       true ->
         catalog = %{
           "type" => "Catalog",
-          "id" => "#{provider}-alta-barra-stac-api",
+          "id" => "#{provider}",
           "stac_version" => "1.0.0",
           "description" =>
             "#{provider} Please reference the official https://cmr.earthdata.nasa.gov/stac for any production based uses.",
@@ -76,13 +78,32 @@ defmodule AltabarraWeb.StacController do
               "rel" => "root",
               "href" => "#{base_url}"
             }
-          ]
+          ] ++ get_provider_collections(conn, provider)
         }
         json(conn, catalog)
       false ->
         conn
         |> put_status(:not_found)
         |> json(%{error: "Provider not found"})
+    end
+  end
+
+  defp get_provider_collections(conn, provider) do
+    base_url = get_base_url(conn)
+
+    case Stac.search_collections(%{provider: provider, page_size: @cmr_page_size_max}, base_url) do
+      {:ok, collections} ->
+        collections |> Enum.map(fn %{"id" => id} ->
+          %{
+            "rel" => "child",
+            "href" => "#{base_url}/collections/#{id}",
+            "type" => "application/json"
+          }
+        end)
+
+      {:error, message} ->
+        IO.inspect(message)
+        []
     end
   end
 
