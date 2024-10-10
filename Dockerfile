@@ -7,13 +7,13 @@
 # This file is based on these images:
 #
 #   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
-#   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20240904-slim - for the release image
+#   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20240926-slim - for the release image
 #   - https://pkgs.org/ - resource for finding needed packages
-#   - Ex: hexpm/elixir:1.17.3-erlang-27.1-debian-bullseye-20240904-slim
+#   - Ex: hexpm/elixir:1.17.3-erlang-27.1.1-debian-bullseye-20240926-slim
 #
 ARG ELIXIR_VERSION=1.17.3
-ARG OTP_VERSION=27.1
-ARG DEBIAN_VERSION=bullseye-20240904-slim
+ARG OTP_VERSION=27.1.1
+ARG DEBIAN_VERSION=bullseye-20240926-slim
 
 ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
 ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
@@ -21,7 +21,7 @@ ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 FROM ${BUILDER_IMAGE} as builder
 
 # install build dependencies
-RUN apt-get update -y && apt-get install -y build-essential git curl \
+RUN apt-get update -y && apt-get install -y build-essential git \
     && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # prepare build dir
@@ -33,7 +33,6 @@ RUN mix local.hex --force && \
 
 # set build ENV
 ENV MIX_ENV="prod"
-ENV ERL_FLAGS="+JPperf true"
 
 # install mix dependencies
 COPY mix.exs mix.lock ./
@@ -44,9 +43,6 @@ RUN mkdir config
 # to ensure any relevant config change will trigger the dependencies
 # to be re-compiled.
 COPY config/config.exs config/${MIX_ENV}.exs config/
-RUN mkdir -p /etc/ssl/certs \
-    && curl https://truststore.pki.rds.amazonaws.com/us-east-1/us-east-1-bundle.pem \
-    -o /etc/ssl/certs/rds-combined-ca-bundle.pem
 RUN mix deps.compile
 
 COPY priv priv
@@ -54,8 +50,6 @@ COPY priv priv
 COPY lib lib
 
 COPY assets assets
-
-copy scripts/entrypoint.sh /entrypoint.sh
 
 # compile assets
 RUN mix assets.deploy
@@ -89,13 +83,9 @@ RUN chown nobody /app
 
 # set runner ENV
 ENV MIX_ENV="prod"
-ENV ERL_FLAGS="+JPperf true"
 
 # Only copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/altabarra ./
-RUN mkdir -p /etc/ssl/certs
-COPY --from=builder --chown=nobody:root /etc/ssl/certs/rds-combined-ca-bundle.pem /etc/ssl/certs/rds-combined-ca-bundle.pem
-COPY --from=builder --chown=nobody:root /entrypoint.sh /entrypoint.sh
 
 USER nobody
 
@@ -104,5 +94,4 @@ USER nobody
 # above and adding an entrypoint. See https://github.com/krallin/tini for details
 # ENTRYPOINT ["/tini", "--"]
 
-ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/app/bin/server"]
