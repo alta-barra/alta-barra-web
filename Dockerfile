@@ -64,7 +64,7 @@ COPY rel rel
 RUN mix release
 
 RUN mkdir -p /etc/ssl/certs
-COPY ./assets/ca-certfile.crt /etc/ssl/certs/ca-certificate.crt
+COPY assets/ca-certificate.crt /etc/ssl/certs/ca-certificate.crt
 
 # start a new build stage so that the final image will only contain
 # the compiled release and other runtime necessities
