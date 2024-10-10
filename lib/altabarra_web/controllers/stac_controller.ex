@@ -29,10 +29,61 @@ defmodule AltabarraWeb.StacController do
           "rel" => "root",
           "href" => "#{base_url}"
         }
-      ]
+      ] ++ get_cmr_provider_catalog_links(base_url)
     }
 
     json(conn, catalog)
+  end
+
+  defp get_cmr_provider_catalog_links(base_url) do
+    with {:ok, providers} <- Stac.fetch_providers() do
+      providers
+      |> Enum.map(fn provider ->
+        %{
+          "rel" => "child",
+          "href" => "#{base_url}/#{provider}",
+          "type" => "application/json"
+        }
+      end)
+    end
+  end
+
+  def get_catalog(conn, %{"provider" => provider}) do
+    base_url = get_base_url(conn)
+
+    case Stac.provider_exists?(provider) do
+      true ->
+        catalog = %{
+          "type" => "Catalog",
+          "id" => "#{provider}-alta-barra-stac-api",
+          "stac_version" => "1.0.0",
+          "description" =>
+            "#{provider} Please reference the official https://cmr.earthdata.nasa.gov/stac for any production based uses.",
+          "links" => [
+            %{
+              "rel" => "self",
+              "href" => "#{base_url}/#{provider}"
+            },
+            %{
+              "rel" => "search",
+              "href" => "#{base_url}/search"
+            },
+            %{
+              "rel" => "collections",
+              "href" => "#{base_url}/collections"
+            },
+            %{
+              "rel" => "root",
+              "href" => "#{base_url}"
+            }
+          ]
+        }
+        json(conn, catalog)
+      false ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Provider not found"})
+    end
   end
 
   def search(conn, _params) do

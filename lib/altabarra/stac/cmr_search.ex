@@ -205,9 +205,15 @@ defmodule Altabarra.Stac.CMRSearch do
   end
 
   def fetch_providers do
-    case FastCache.get(:default, @providers_cache_key) do
+    case FastCache.get(Altabarra.LRUCache.Default, @providers_cache_key) do
       nil -> fetch_and_cache_providers()
       cached_result -> {:ok, decode_cached_result(cached_result)}
+    end
+  end
+
+  def provider_exists?(provider) do
+    with {:ok, providers} <- fetch_providers() do
+      Enum.any?(providers, &(&1 == provider))
     end
   end
 
@@ -238,7 +244,7 @@ defmodule Altabarra.Stac.CMRSearch do
 
   defp cache_provider_ids(provider_ids) do
     encoded_ids = :erlang.term_to_binary(provider_ids)
-    FastCache.put(:default, @providers_cache_key, encoded_ids)
+    FastCache.put(Altabarra.LRUCache.Default, @providers_cache_key, encoded_ids)
   end
 
   defp decode_cached_result(cached_result) do

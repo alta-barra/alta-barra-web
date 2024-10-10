@@ -42,6 +42,7 @@ defmodule AltabarraWeb.Router do
     get "/collections/:id", StacController, :get_collection
     get "/collections/:collection_id/items", StacController, :list_items
     get "/collections/:collection_id/items/:item_id", StacController, :get_item
+    get "/:provider", StacController, :get_catalog
   end
 
   # Authentication routes
