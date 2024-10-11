@@ -1,4 +1,15 @@
-<.flash_group flash={@flash} />
+<!-- Nav Section -->
+<nav class="px-4 sm:px-6 lg:px-8 flex space-x-6">
+  <div class="items-center gap-4 font-semibold leading-6 text-zinc-900">
+    <a href={~p"/"}> Home </a>
+  </div>
+  <div class="items-center gap-4 font-semibold leading-6 text-zinc-900">
+    <a href={~p"/services"}> Services </a>
+  </div>
+  <div class="items-center gap-4 font-semibold leading-6 text-zinc-900">
+    <a href={~p"/contact"}> Contact </a>
+  </div>
+</nav>
 <!-- Hero Section -->
 <section id="hero">
   <div class="max-w-6xl mx-auto text-center mb-40 px-10 pt-16">
@@ -8,8 +19,17 @@
     <p class="max-w-3xl mx-auto mb-10 text-2xl text-slate-500">A Higher Bar For Software</p>
   </div>
 </section>
-
-<div
+<!-- Introduction -->
+<section
+  id="introduction"
+  class="w-full mx-auto lg:px-24 text-center items-center text-center mb-8"
+>
+  <p class="text-3xl font-brand">
+    Building innovative and creating solutions brings me joy and seeing how they can be improved and made better is my goal.
+  </p>
+</section>
+<!-- Credentials -->
+<section
   id="credentials"
   class="flex flex-col px-8 lg:flex-row mx-auto justify-center text-center space-y-4 lg:space-y-0 lg:space-x-8"
 >
@@ -34,4 +54,6 @@
   >
     <h3 class="text-2xl font-bold md:text-3xl">Credly</h3>
   </a>
-</div>
+</section>
+
+<.flash_group flash={@flash} />

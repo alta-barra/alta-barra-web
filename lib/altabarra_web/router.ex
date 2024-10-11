@@ -31,6 +31,7 @@ defmodule AltabarraWeb.Router do
     get "/", PageController, :home
     get "/status", HealthcheckController, :status
     get "/contact", PageController, :contact
+    get "/services", PageController, :services
   end
 
   scope "/api/stac", AltabarraWeb do

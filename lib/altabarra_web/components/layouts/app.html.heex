@@ -1,20 +1,15 @@
-<header class="px-4 sm:px-6 lg:px-8">
-  <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
-    <div class="flex items-center gap-4">
-      <!-- <a href="/"> -->
-      <!--   <img src={~p"/images/logo.svg"} width="36" /> -->
-      <!-- </a> -->
-      <!-- <p class="bg-brand/5 text-brand rounded-full px-2 font-medium leading-6"> -->
-      <!--   v<%= Application.spec(:phoenix, :vsn) %> -->
-      <!-- </p> --> <a href="/"> Home </a>
-    </div>
-    <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
-      <!-- <a href="https://github.com/alta-barra" class="hover:text-zinc-700"> -->
-      <!--   GitHub -->
-      <!-- </a> -->
-    </div>
+<nav class="px-4 sm:px-6 lg:px-8 flex space-x-6">
+  <div class="items-center gap-4 font-semibold leading-6 text-zinc-900">
+    <a href={~p"/"}> Home </a>
   </div>
-</header>
+  <div class="items-center gap-4 font-semibold leading-6 text-zinc-900">
+    <a href={~p"/services"}> Services </a>
+  </div>
+  <div class="items-center gap-4 font-semibold leading-6 text-zinc-900">
+    <a href={~p"/contact"}> Contact </a>
+  </div>
+</nav>
+
 <main class="px-4 py-20 sm:px-6 lg:px-8">
   <div class="mx-auto">
     <.flash_group flash={@flash} />
