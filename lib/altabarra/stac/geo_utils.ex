@@ -1,5 +1,4 @@
 defmodule Altabarra.Stac.GeoUtils do
-
   @max_latitude 90
   @min_latitude -90
   @max_longitude 180
@@ -69,12 +68,13 @@ defmodule Altabarra.Stac.GeoUtils do
 
   defp process_lines(lines) do
     # Flatten the list of lines into a single list of points
-    points = Enum.flat_map(lines, fn line ->
-      line
-      |> String.split()
-      |> Enum.map(&String.to_float/1)
-      |> to_points()
-    end)
+    points =
+      Enum.flat_map(lines, fn line ->
+        line
+        |> String.split()
+        |> Enum.map(&String.to_float/1)
+        |> to_points()
+      end)
 
     calculate_bbox_from_points(points)
   end
@@ -113,14 +113,18 @@ defmodule Altabarra.Stac.GeoUtils do
 
   defp calculate_bbox_from_points(points) do
     {min_lon, min_lat, max_lon, max_lat} =
-      Enum.reduce(points, {@max_longitude, @max_latitude, @min_longitude, @min_latitude}, fn point, {min_lon, min_lat, max_lon, max_lat} ->
-        {
-          min(min_lon, point["lon"]),
-          min(min_lat, point["lat"]),
-          max(max_lon, point["lon"]),
-          max(max_lat, point["lat"])
-        }
-      end)
+      Enum.reduce(
+        points,
+        {@max_longitude, @max_latitude, @min_longitude, @min_latitude},
+        fn point, {min_lon, min_lat, max_lon, max_lat} ->
+          {
+            min(min_lon, point["lon"]),
+            min(min_lat, point["lat"]),
+            max(max_lon, point["lon"]),
+            max(max_lat, point["lat"])
+          }
+        end
+      )
 
     [min_lon, min_lat, max_lon, max_lat]
   end

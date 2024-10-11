@@ -14,24 +14,25 @@ defmodule AltabarraWeb.StacController do
       "stac_version" => "1.0.0",
       "description" =>
         "NASA CMR STAC API by Alta Barra. Please reference the official https://cmr.earthdata.nasa.gov/stac for any production based uses.",
-      "links" => [
-        %{
-          "rel" => "self",
-          "href" => "#{base_url}"
-        },
-        %{
-          "rel" => "search",
-          "href" => "#{base_url}/search"
-        },
-        %{
-          "rel" => "collections",
-          "href" => "#{base_url}/collections"
-        },
-        %{
-          "rel" => "root",
-          "href" => "#{base_url}"
-        }
-      ] ++ get_cmr_provider_catalog_links(base_url)
+      "links" =>
+        [
+          %{
+            "rel" => "self",
+            "href" => "#{base_url}"
+          },
+          %{
+            "rel" => "search",
+            "href" => "#{base_url}/search"
+          },
+          %{
+            "rel" => "collections",
+            "href" => "#{base_url}/collections"
+          },
+          %{
+            "rel" => "root",
+            "href" => "#{base_url}"
+          }
+        ] ++ get_cmr_provider_catalog_links(base_url)
     }
 
     json(conn, catalog)
@@ -61,26 +62,29 @@ defmodule AltabarraWeb.StacController do
           "stac_version" => "1.0.0",
           "description" =>
             "#{provider} Please reference the official https://cmr.earthdata.nasa.gov/stac for any production based uses.",
-          "links" => [
-            %{
-              "rel" => "self",
-              "href" => "#{base_url}/#{provider}"
-            },
-            %{
-              "rel" => "search",
-              "href" => "#{base_url}/search"
-            },
-            %{
-              "rel" => "collections",
-              "href" => "#{base_url}/collections"
-            },
-            %{
-              "rel" => "root",
-              "href" => "#{base_url}"
-            }
-          ] ++ get_provider_collections(conn, provider)
+          "links" =>
+            [
+              %{
+                "rel" => "self",
+                "href" => "#{base_url}/#{provider}"
+              },
+              %{
+                "rel" => "search",
+                "href" => "#{base_url}/search"
+              },
+              %{
+                "rel" => "collections",
+                "href" => "#{base_url}/collections"
+              },
+              %{
+                "rel" => "root",
+                "href" => "#{base_url}"
+              }
+            ] ++ get_provider_collections(conn, provider)
         }
+
         json(conn, catalog)
+
       false ->
         conn
         |> put_status(:not_found)
@@ -93,7 +97,8 @@ defmodule AltabarraWeb.StacController do
 
     case Stac.search_collections(%{provider: provider, page_size: @cmr_page_size_max}, base_url) do
       {:ok, collections} ->
-        collections |> Enum.map(fn %{"id" => id} ->
+        collections
+        |> Enum.map(fn %{"id" => id} ->
           %{
             "rel" => "child",
             "href" => "#{base_url}/collections/#{id}",
