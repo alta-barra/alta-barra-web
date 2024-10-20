@@ -1,0 +1,36 @@
+# postgres-podman.yaml
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secrets
+type: Opaque
+stringData:
+  POSTGRES_USER: altabarra
+  POSTGRES_PASSWORD: altabarra
+  POSTGRES_DB: altabarra_dev
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: postgres-dev
+  labels:
+    app: postgres
+spec:
+  containers:
+    - name: postgres
+      image: postgres:16-alpine
+      ports:
+        - containerPort: 5432
+          hostPort: 5432
+      envFrom:
+        - secretRef:
+            name: postgres-secrets
+      volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+  volumes:
+    - name: postgres-storage
+      hostPath:
+        path: ${HOME}/altabarra_postgres_data
+        type: DirectoryOrCreate
