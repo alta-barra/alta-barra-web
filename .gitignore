@@ -1,0 +1,70 @@
+# Elixir and Phoenix
+/_build/
+/cover/
+/deps/
+/doc/
+/.fetch
+erl_crash.dump
+*.ez
+/tmp/
+altabarra-*.tar
+npm-debug.log
+
+# Phoenix specific
+/priv/static/assets/
+/priv/static/cache_manifest.json
+
+# Node.js dependencies (for frontend)
+/assets/node_modules/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+*.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Docker
+docker-compose.override.yml
+*.env
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Elixir language server
+.elixir_ls/
+
+# Mix artifacts
+_build/
+deps/
+*.beam
+/config/*.secret.exs
+
+# Logs
+/log/
+*.log
+
+# Temporary files
+/tmp/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+/gitleaks-report.json

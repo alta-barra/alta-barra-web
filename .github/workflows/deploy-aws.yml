@@ -1,0 +1,36 @@
+name: Deploy Elixir App to AWS
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build_and_upload:
+    name: Build and Upload
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      MIX_ENV: prod
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - run: |
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 278803536744.dkr.ecr.us-east-1.amazonaws.com
+            docker build -t alta-barra-webapp .
+            docker tag alta-barra-webapp:latest 278803536744.dkr.ecr.us-east-1.amazonaws.com/alta-barra-webapp:${{ github.sha }}
+            docker push 278803536744.dkr.ecr.us-east-1.amazonaws.com/alta-barra-webapp:${{ github.sha }} || echo "Docker push failed, but continuing with the workflow"
+      - run: ./apply.sh production apply
+        working-directory: infra/scripts
+        env:
+          TF_VAR_public_ec2_key: ${{ vars.PUBLIC_EC2_KEY }}
+          TF_VAR_secret_key_base: ${{ secrets.PHX_SECRET_KEY_BASE }}
+          TF_VAR_hash: ${{ github.sha }}

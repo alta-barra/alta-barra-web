@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" class="[scrollbar-gutter:stable]">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <.live_title suffix=" · Software Services">
+      <%= assigns[:page_title] || "Alta Barra" %>
+    </.live_title>
+    <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
+    </script>
+    <!-- SEO Things -->
+    <meta
+      name="description"
+      content="Alta Barra offers expert software and cloud engineering services tailored for smaller projects and ongoing maintenance."
+    />
+    <meta
+      name="keywords"
+      content="software services, cloud engineering, software maintenance, Alta Barra"
+    />
+    <meta name="robots" content="index,follow" />
+    <!-- Open Graph tags -->
+    <meta property="og:site_name" content="Alta Barra" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content={assigns[:og_title] || "Alta Barra Software"} />
+    <meta
+      property="og:description"
+      content={assigns[:og_description] || "Home of Alta Barra software and cloud engineering."}
+    />
+    <meta property="og:url" content={Phoenix.Controller.current_url(@conn)} />
+    <meta property="og:type" content="website" />
+    <!-- Structured data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Alta Barra",
+        "url": "<%= Phoenix.Controller.current_url(@conn) %>"
+      }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@200;400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-white antialiased">
+    <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
+      <%= if @current_user do %>
+        <li class="md:visible collapse text-[0.8125rem] leading-6 text-zinc-900">
+          <%= if @current_user.role == "admin" do %>
+            <%= @current_user.email %><span class="pl-1 text-red-500 font-bold">[ADMIN]</span>
+          <% else %>
+            <%= @current_user.email %>
+          <% end %>
+        </li>
+
+        <%= if @current_user.role == "admin" do %>
+          <li>
+            <.link
+              href={~p"/admin/analytics"}
+              class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+            >
+              Analytics
+            </.link>
+          </li>
+        <% end %>
+        <li>
+          <.link
+            href={~p"/users/settings"}
+            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+          >
+            Settings
+          </.link>
+        </li>
+        <li>
+          <.link
+            href={~p"/users/log_out"}
+            method="delete"
+            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+          >
+            Log out
+          </.link>
+        </li>
+      <% else %>
+        <li>
+          <.link
+            href={~p"/users/register"}
+            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+          >
+            Register
+          </.link>
+        </li>
+        <li>
+          <.link
+            href={~p"/users/log_in"}
+            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+          >
+            Log in
+          </.link>
+        </li>
+      <% end %>
+    </ul>
+
+    <%= @inner_content %>
+
+    <footer class="bg-gray-800 text-white py-4 w-full sm:fixed sm:bottom-0 mt-8 sm:mt-0">
+      <div class="container mx-auto text-center">
+        <p>&copy; 2024 Alta Barra. All rights reserved.</p>
+        <p>
+          <a href={~p"/contact"} class="text-blue-400 hover:text-blue-300">
+            Contact
+          </a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

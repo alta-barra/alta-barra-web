@@ -1,0 +1,21 @@
+<nav class="px-4 sm:px-6 lg:px-8 flex space-x-6">
+  <div class="items-center gap-4 font-semibold leading-6 text-zinc-900">
+    <a href={~p"/"}> Home </a>
+  </div>
+  <div class="items-center gap-4 font-semibold leading-6 text-zinc-900">
+    <a href={~p"/services"}> Services </a>
+  </div>
+  <div class="items-center gap-4 font-semibold leading-6 text-zinc-900">
+    <a href={~p"/apis"}> APIs </a>
+  </div>
+  <div class="items-center gap-4 font-semibold leading-6 text-zinc-900">
+    <a href={~p"/contact"}> Contact </a>
+  </div>
+</nav>
+
+<main class="px-4 py-20 sm:px-6 lg:px-8">
+  <div class="mx-auto">
+    <.flash_group flash={@flash} />
+    <%= @inner_content %>
+  </div>
+</main>

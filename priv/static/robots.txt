@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api
+Allow: /apis
+
+Sitemap: https://alta-barra.com/sitemap.xml

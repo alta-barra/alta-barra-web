@@ -1,0 +1,47 @@
+<section id="apis" class="container mx-auto px-4 py-8">
+  <div class="space-y-16">
+    <div class="flex flex-col md:flex-row items-center">
+      <div class="md:w-1/2 md:pr-8">
+        <h3 class="font-semibold text-xl mb-2">Spatio Temporal Asset Catalog</h3>
+        <p>
+          You may access access the STAC API at
+          <a href={~p"/api/stac"} class="bg-zinc-200 font-italic">//api/stac</a>
+        </p>
+        <div class="mt-4">
+          <p>
+            For a more interactive method I suggest checking out the
+            <a
+              href="https://radiantearth.github.io/stac-browser"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-bold text-blue-500"
+            >
+              STAC Browser
+            </a>
+            and refrencing the Alta Barra STAC API endpoint.
+          </p>
+          <button
+            class="text-lg px-2 bg-zinc-800 rounded text-center mt-2 text-white hover:text-blue-200"
+            id="stac-api-url"
+            phx-hook="CopyToClipboard"
+            data-clipboard-target="https://alta-barra.com/api/stac"
+          >
+            <img class="inline" src="/images/copy.svg" alt="Copy STAC URL button" />
+            https://alta-barra.com/api/stac
+          </button>
+        </div>
+      </div>
+      <div class="md:w-1/2 mt-4 md:mt-0">
+        <a href="https://stacspec.org/en" target="_blank" rel="noopener noreferrer">
+          <img
+            src={~p"/images/apis_stac.png"}
+            alt="Spatio Temporal Asset Catalog API"
+            class="w-full h-auto rounded-lg shadow-md"
+          />
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<.flash_group flash={@flash} />
