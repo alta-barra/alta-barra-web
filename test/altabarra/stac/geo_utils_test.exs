@@ -1,6 +1,7 @@
 defmodule Altabarra.Stac.GeoUtilsTest do
   use ExUnit.Case, async: true
   alias Altabarra.Stac.GeoUtils
+  doctest GeoUtils
 
   describe "spatial_to_bbox/1" do
     test "handles single point conversion" do
@@ -24,7 +25,7 @@ defmodule Altabarra.Stac.GeoUtilsTest do
     end
 
     test "handles single line conversion" do
-      data = %{"lines" => ["40.0 -70.0 41.0 -71.0"]}
+      data = %{"lines" => ["-70.0 40.0 -71.0 41.0"]}
       [w, s, e, n] = GeoUtils.spatial_to_bbox(data)
 
       assert_in_delta w, -71.0, 0.001
@@ -34,7 +35,7 @@ defmodule Altabarra.Stac.GeoUtilsTest do
     end
 
     test "handles multiple line conversion" do
-      data = %{"lines" => ["40.0 -70.0 41.0 -71.0", "42.0 -72.0 43.0 -73.0"]}
+      data = %{"lines" => ["-70.0 40.0 -71.0 41.0", "-72.0 42.0 -73.0 43.0"]}
       [w, s, e, n] = GeoUtils.spatial_to_bbox(data)
 
       assert_in_delta w, -73.0, 0.001
@@ -44,7 +45,7 @@ defmodule Altabarra.Stac.GeoUtilsTest do
     end
 
     test "handles single box conversion" do
-      data = %{"boxes" => ["40.0 -70.0 41.0 -71.0"]}
+      data = %{"boxes" => ["-70.0 40.0 -71.0 41.0"]}
       [w, s, e, n] = GeoUtils.spatial_to_bbox(data)
 
       assert_in_delta s, -71.0, 0.001
@@ -54,7 +55,7 @@ defmodule Altabarra.Stac.GeoUtilsTest do
     end
 
     test "handles multiple box conversion" do
-      data = %{"boxes" => ["40.0 -70.0 41.0 -71.0", "42.0 -72.0 43.0 -73.0"]}
+      data = %{"boxes" => ["-70.0 40.0 -71.0 41.0", "-72.0 42.0 -73.0 43.0"]}
       [w, s, e, n] = GeoUtils.spatial_to_bbox(data)
 
       assert_in_delta s, -73.0, 0.001
@@ -64,7 +65,7 @@ defmodule Altabarra.Stac.GeoUtilsTest do
     end
 
     test "handles single polygon conversion" do
-      data = %{"polygons" => ["40.0 -70.0 41.0 -71.0 40.5 -70.5 40.0 -70.0"]}
+      data = %{"polygons" => ["-70.0 40.0 -71.0 41.0 -70.5 40.5 -70.0 40.0"]}
       [w, s, e, n] = GeoUtils.spatial_to_bbox(data)
 
       assert_in_delta w, -71.0, 0.001
@@ -76,7 +77,7 @@ defmodule Altabarra.Stac.GeoUtilsTest do
     test "handles polygon list conversion" do
       data = %{
         "polygons" => [
-          ["40.0 -70.0 41.0 -71.0 40.5 -70.5 40.0 -70.0"]
+          ["-70.0 40.0 -71.0 41.0 -70.5 40.5 -70.0 40.0"]
         ]
       }
 
@@ -91,8 +92,8 @@ defmodule Altabarra.Stac.GeoUtilsTest do
     test "handles multiple polygon conversion" do
       data = %{
         "polygons" => [
-          "40.0 -70.0 41.0 -71.0 40.5 -70.5 40.0 -70.0",
-          "42.0 -72.0 43.0 -73.0 42.5 -72.5 42.0 -72.0"
+          "-70.0 40.0 -71.0 41.0 -70.5 40.5 -70.0 40.0",
+          "-72.0 42.0 -73.0 43.0 -72.5 42.5 -72.0 42.0"
         ]
       }
 

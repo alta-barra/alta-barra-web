@@ -6,6 +6,9 @@ defmodule Altabarra.Stac.GeoUtils do
   The second coordinate (south) is the minimum latitude.
   The third coordinate (east) is the maximum longitude.
   The fourth coordinate (north) is the maximum latitude.
+
+  CMR JSON format provides coordinates in {lat, lon} order, but STAC specification requires coordinates in {lon, lat} order.
+  This reversal ensures compatibility when converting between formats. All conversions in this module are assumed to have been from CMR
   """
   # WEST
   @min_longitude -180
@@ -21,7 +24,7 @@ defmodule Altabarra.Stac.GeoUtils do
 
   @delta 0.0001
 
-  defp point_to_bbox({lat, lon}, delta \\ @delta) do
+  defp point_to_bbox({lon, lat}, delta \\ @delta) do
     [
       # west
       max(lon - delta, @min_longitude),
@@ -39,7 +42,7 @@ defmodule Altabarra.Stac.GeoUtils do
       Enum.reduce(
         points,
         {@max_longitude, @max_latitude, @min_longitude, @min_latitude},
-        fn {lat, lon}, {west, south, east, north} ->
+        fn {lon, lat}, {west, south, east, north} ->
           {
             min(west, lon),
             min(south, lat),
@@ -52,6 +55,9 @@ defmodule Altabarra.Stac.GeoUtils do
     [west, south, east, north]
   end
 
+  @doc """
+  This converts CMR geometries to STAC geometries.
+  """
   def spatial_to_bbox(%{"points" => points}) do
     parsed_points = parse_points(points)
 
@@ -130,7 +136,8 @@ defmodule Altabarra.Stac.GeoUtils do
     {Float.parse(lon_str) |> elem(0), Float.parse(lat_str) |> elem(0)}
   end
 
-  defp extract_coordinates([{longitude, _}, {latitude, _}]) do
+  defp extract_coordinates([{latitude, _}, {longitude, _}]) do
+    # CMR to STAC point conversion happens here
     {longitude, latitude}
   end
 end
