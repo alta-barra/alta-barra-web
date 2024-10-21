@@ -64,6 +64,7 @@ defmodule Altabarra.MixProject do
       {:jason, "~> 1.4"},
       {:swoosh, "~> 1.5"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:stac_validator, "~> 0.1", only: [:dev, :test]},
 
       # Telemetry and monitoring
       {:telemetry_metrics, "~> 1.0"},
