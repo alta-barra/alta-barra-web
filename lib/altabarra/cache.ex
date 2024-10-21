@@ -1,4 +1,7 @@
 defmodule Altabarra.Cache do
+  @moduledoc """
+  Defines a genserver that acts as a key-value pair cache that is backed by the database.
+  """
   use GenServer
   import Ecto.Query
   alias Altabarra.Repo

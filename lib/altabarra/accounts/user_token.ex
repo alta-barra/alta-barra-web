@@ -1,4 +1,7 @@
 defmodule Altabarra.Accounts.UserToken do
+  @moduledoc """
+  Handles user token creation for sessions.
+  """
   use Ecto.Schema
   import Ecto.Query
   alias Altabarra.Accounts.UserToken

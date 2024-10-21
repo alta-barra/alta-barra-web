@@ -55,8 +55,7 @@ defmodule Altabarra.Stac.SearchKeyGenerator do
   defp generate_params_hash(search_params) do
     search_params
     |> Enum.sort_by(fn {k, _} -> k end)
-    |> Enum.map(fn {k, v} -> "#{k}=#{v}" end)
-    |> Enum.join("&")
+    |> Enum.map_join("&", fn {k, v} -> "#{k}=#{v}" end)
     |> (&:crypto.hash(:md5, &1)).()
     |> Base.encode16(case: :lower)
   end

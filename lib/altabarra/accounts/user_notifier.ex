@@ -1,4 +1,7 @@
 defmodule Altabarra.Accounts.UserNotifier do
+  @moduledoc """
+  Handles mail delivery from the system.
+  """
   import Swoosh.Email
 
   alias Altabarra.Mailer

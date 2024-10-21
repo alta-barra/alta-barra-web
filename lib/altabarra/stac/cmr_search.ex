@@ -77,7 +77,11 @@ defmodule Altabarra.Stac.CMRSearch do
 
     bbox = GeoUtils.spatial_to_bbox(granule)
 
+    provider = granule["data_center"]
+
     %{
+      "stac_version" => "1.1.0",
+      "stac_extensions" => [],
       "type" => "Feature",
       "id" => granule["title"],
       "collection" => collection_id,
@@ -100,15 +104,16 @@ defmodule Altabarra.Stac.CMRSearch do
       "links" => [
         %{
           "rel" => "self",
-          "href" => "#{base_url}/collections/#{collection_id}/items/#{granule["title"]}"
+          "href" =>
+            "#{base_url}/#{provider}/collections/#{collection_id}/items/#{granule["title"]}"
         },
         %{
           "rel" => "parent",
-          "href" => "#{base_url}/collections/#{collection_id}"
+          "href" => "#{base_url}/#{provider}/collections/#{collection_id}"
         },
         %{
           "rel" => "collection",
-          "href" => "#{base_url}/collections/#{collection_id}"
+          "href" => "#{base_url}/#{provider}/collections/#{collection_id}"
         },
         %{
           "rel" => "via",
@@ -146,14 +151,16 @@ defmodule Altabarra.Stac.CMRSearch do
   defp convert_collection_to_stac_collection(collection, base_url) do
     cmr_concept_id = collection["id"]
     bbox = GeoUtils.spatial_to_bbox(collection)
+    provider = collection["id"] |> String.split(~r/-/) |> Enum.at(1)
 
     %{
+      "stac_version" => "1.1.0",
+      "stac_extensions" => [],
       "type" => "Collection",
       "id" => collection["short_name"],
-      "stac_version" => "1.0.0",
-      "description" => collection["summary"],
-      "license" => "proprietary",
+      "license" => "other",
       "title" => collection["short_name"],
+      "description" => collection["summary"],
       "extent" => %{
         "spatial" => %{
           # NOTE: STAC Collection bbox is an array of arrays
@@ -165,16 +172,19 @@ defmodule Altabarra.Stac.CMRSearch do
       },
       "properties" =>
         remove_null_values(%{
-          "cmr:provider" => collection["id"] |> String.split(~r/-/) |> Enum.at(1),
+          "cmr:provider" => provider,
           "cmr:concept_id" => collection["id"],
           "cmr:revision_id" => collection["revision_id"],
           "cmr:dataset_id" => collection["dataset_id"]
         }),
       "links" => [
-        %{"rel" => "self", "href" => "#{base_url}/collections/#{collection["short_name"]}"},
+        %{
+          "rel" => "self",
+          "href" => "#{base_url}/#{provider}collections/#{collection["short_name"]}"
+        },
         %{
           "rel" => "items",
-          "href" => "#{base_url}/collections/#{collection["short_name"]}/items"
+          "href" => "#{base_url}/#{provider}/collections/#{collection["short_name"]}/items"
         },
         %{"rel" => "root", "href" => base_url},
         %{

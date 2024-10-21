@@ -63,6 +63,7 @@ defmodule Altabarra.MixProject do
        depth: 1},
       {:jason, "~> 1.4"},
       {:swoosh, "~> 1.5"},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
 
       # Telemetry and monitoring
       {:telemetry_metrics, "~> 1.0"},
