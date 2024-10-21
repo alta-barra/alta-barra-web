@@ -21,7 +21,7 @@ defmodule Altabarra.Stac.GeoUtils do
 
   @delta 0.0001
 
-  defp point_to_bbox({lon, lat}, delta \\ @delta) do
+  defp point_to_bbox({lat, lon}, delta \\ @delta) do
     [
       # west
       max(lon - delta, @min_longitude),
@@ -39,7 +39,7 @@ defmodule Altabarra.Stac.GeoUtils do
       Enum.reduce(
         points,
         {@max_longitude, @max_latitude, @min_longitude, @min_latitude},
-        fn {lon, lat}, {west, south, east, north} ->
+        fn {lat, lon}, {west, south, east, north} ->
           {
             min(west, lon),
             min(south, lat),
