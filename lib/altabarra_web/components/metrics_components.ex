@@ -1,4 +1,7 @@
 defmodule AltabarraWeb.AnalyticsComponents do
+  @moduledoc """
+  Defines a set of reusable components for displaying numeric and tabular metrics.
+  """
   use Phoenix.Component
 
   def metric_box(assigns) do

@@ -40,12 +40,11 @@ defmodule AltabarraWeb.Router do
     pipe_through :api
 
     get "/", StacController, :root_catalog
-    get "/search", StacController, :search
-    get "/collections", StacController, :list_collections
-    get "/collections/:id", StacController, :get_collection
-    get "/collections/:collection_id/items", StacController, :list_items
-    get "/collections/:collection_id/items/:item_id", StacController, :get_item
     get "/:provider", StacController, :get_catalog
+    get "/:provider/collections", StacController, :list_collections
+    get "/:provider/collections/:collection_id", StacController, :get_collection
+    get "/:provider/collections/:collection_id/items", StacController, :list_items
+    get "/:provider/collections/:collection_id/items/:item_id", StacController, :get_item
   end
 
   # Authentication routes

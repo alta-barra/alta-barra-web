@@ -1,4 +1,7 @@
 defmodule Altabarra.Cache.Entry do
+  @moduledoc """
+  Defines the schema for a cache entry. This is for a key-value pair cache.
+  """
   use Ecto.Schema
   import Ecto.Changeset
 

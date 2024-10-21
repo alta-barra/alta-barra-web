@@ -1,4 +1,7 @@
 defmodule Altabarra.Accounts.User do
+  @moduledoc """
+  Defines the schema for a user in Alta-Barra.
+  """
   use Ecto.Schema
   import Ecto.Changeset
 

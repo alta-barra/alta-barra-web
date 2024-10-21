@@ -10,24 +10,15 @@ defmodule AltabarraWeb.StacController do
     base_url = get_base_url(conn)
 
     catalog = %{
+      "stac_version" => "1.1.0",
       "type" => "Catalog",
       "id" => "alta-barra-stac-api",
-      "stac_version" => "1.0.0",
-      "description" =>
-        "NASA CMR STAC API by Alta Barra. Please reference the official https://cmr.earthdata.nasa.gov/stac for any production based uses.",
+      "description" => "NASA CMR STAC API by Alta Barra.",
       "links" =>
         [
           %{
             "rel" => "self",
             "href" => "#{base_url}"
-          },
-          %{
-            "rel" => "search",
-            "href" => "#{base_url}/search"
-          },
-          %{
-            "rel" => "collections",
-            "href" => "#{base_url}/collections"
           },
           %{
             "rel" => "root",
@@ -59,8 +50,8 @@ defmodule AltabarraWeb.StacController do
       true ->
         catalog = %{
           "type" => "Catalog",
+          "stac_version" => "1.1.0",
           "id" => "#{provider}",
-          "stac_version" => "1.0.0",
           "description" =>
             "#{provider} Please reference the official https://cmr.earthdata.nasa.gov/stac for any production based uses.",
           "links" =>
@@ -75,7 +66,7 @@ defmodule AltabarraWeb.StacController do
               },
               %{
                 "rel" => "collections",
-                "href" => "#{base_url}/collections"
+                "href" => "#{base_url}/#{provider}/collections"
               },
               %{
                 "rel" => "root",
@@ -89,7 +80,7 @@ defmodule AltabarraWeb.StacController do
       false ->
         conn
         |> put_status(:not_found)
-        |> json(%{error: "Provider not found"})
+        |> json(%{error: "Provider Catalog not found"})
     end
   end
 
@@ -102,7 +93,7 @@ defmodule AltabarraWeb.StacController do
         |> Enum.map(fn %{"id" => id} ->
           %{
             "rel" => "child",
-            "href" => "#{base_url}/collections/#{id}",
+            "href" => "#{base_url}/#{provider}/collections/#{id}",
             "type" => "application/json"
           }
         end)
@@ -117,7 +108,7 @@ defmodule AltabarraWeb.StacController do
     base_url = get_base_url(conn)
 
     case Stac.search_collections(params, base_url) do
-      {:ok, items} -> json(conn, %{type: "FeatureCollection", items: items})
+      {:ok, items} -> json(conn, %{type: "FeatureCollection", features: items, links: []})
       {:error, msg} -> json(conn, %{type: "error", message: msg})
     end
   end
@@ -127,7 +118,7 @@ defmodule AltabarraWeb.StacController do
 
     case Stac.search_collections(params, base_url) do
       {:ok, collections} ->
-        json(conn, %{collections: collections})
+        json(conn, %{collections: collections, links: []})
 
       {:error, message} ->
         conn
@@ -136,7 +127,7 @@ defmodule AltabarraWeb.StacController do
     end
   end
 
-  def get_collection(conn, %{"id" => id}) do
+  def get_collection(conn, %{"collection_id" => id}) do
     base_url = get_base_url(conn)
 
     case Stac.search_collections(%{"short_name" => id}, base_url) do
@@ -169,7 +160,7 @@ defmodule AltabarraWeb.StacController do
 
         case Stac.search_items(params, base_url) do
           {:ok, items} ->
-            json(conn, %{type: "FeatureCollection", features: items})
+            json(conn, %{type: "FeatureCollection", features: items, links: []})
 
           {:error, message} ->
             conn
@@ -191,7 +182,7 @@ defmodule AltabarraWeb.StacController do
 
   def get_item(conn, %{"collection_id" => collection_id, "item_id" => item_id}) do
     base_url = get_base_url(conn)
-    # First, we need to get the collection's concept_id
+
     case Stac.search_collections(%{"short_name" => collection_id}, base_url) do
       {:ok, [collection | _]} ->
         concept_id = collection["properties"]["cmr:concept_id"]

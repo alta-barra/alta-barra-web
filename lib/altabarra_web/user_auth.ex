@@ -1,4 +1,7 @@
 defmodule AltabarraWeb.UserAuth do
+  @moduledoc """
+  This module handles user authentication.
+  """
   use AltabarraWeb, :verified_routes
 
   import Plug.Conn
