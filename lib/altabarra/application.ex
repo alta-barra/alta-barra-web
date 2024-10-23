@@ -11,11 +11,8 @@ defmodule Altabarra.Application do
       {DNSCluster, query: Application.get_env(:altabarra, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Altabarra.PubSub},
       {Finch, name: Altabarra.Finch},
-      # In-memory caches
-      Supervisor.child_spec({Altabarra.LRUCache, Altabarra.LRUCache.Default}, id: :cache_0),
-      Supervisor.child_spec({Altabarra.LRUCache, Altabarra.LRUCache.CMRCollectionCache},
-        id: :cache_1
-      ),
+      # In-memory caches (non-memoized)
+      Supervisor.child_spec({Altabarra.LRUCache, :cmr_collections}, id: :cmr_collections_cache),
       AltabarraWeb.Endpoint
     ]
 

@@ -65,6 +65,12 @@ defmodule Altabarra.MixProject do
       {:swoosh, "~> 1.5"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:stac_validator, "~> 0.1", only: [:dev, :test]},
+      {:memoize, "~> 1.4"},
+
+      # Testing
+      {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
+      {:ex_machina, "~> 2.8.0", only: :test},
+      {:exvcr, "~> 0.11", only: :test},
 
       # Telemetry and monitoring
       {:telemetry_metrics, "~> 1.0"},

@@ -4,13 +4,14 @@ defmodule Altabarra.Stac.CMRSearch do
   """
 
   alias Altabarra.LRUCache, as: FastCache
-  alias Altabarra.Stac.GeoUtils
+  alias Altabarra.Stac.{Item, Collection, GeoUtils}
 
   use Tesla
+  use Memoize
 
-  @stac_cache Altabarra.LRUCache.CMRCollectionCache
+  @stac_cache :cmr_collections
   @cmr_root "https://cmr.earthdata.nasa.gov"
-  @providers_cache_key "cmr_providers"
+  @provider_ttl 7 * 24 * 60 * 1000
 
   plug Tesla.Middleware.BaseUrl, @cmr_root
   plug Tesla.Middleware.JSON
@@ -65,29 +66,34 @@ defmodule Altabarra.Stac.CMRSearch do
     end)
   end
 
+  @spec convert_granule_to_stac_item(map, String.t()) :: Item
   defp convert_granule_to_stac_item(granule, base_url) do
     cmr_concept_id = granule["id"]
     collection_concept_id = granule["collection_concept_id"]
 
+    # NOTE: using the LRU cache here instead of memoize to prevent holding too much in memory
+    # TODO: pass the cache in to allow for modular testing
     collection_id =
       case FastCache.get(@stac_cache, collection_concept_id) do
+        # HACK this is bad to do here
         nil -> fetch_and_cache_collection(collection_concept_id)
         cached_result -> cached_result
       end
 
     bbox = GeoUtils.spatial_to_bbox(granule)
+    geometry = GeoUtils.spatial_to_geometry(granule)
 
     provider = granule["data_center"]
 
-    %{
-      "stac_version" => "1.1.0",
-      "stac_extensions" => [],
-      "type" => "Feature",
-      "id" => granule["title"],
-      "collection" => collection_id,
-      # NOTE: bbox for ITEMS is a flat array
-      "bbox" => bbox,
-      "properties" =>
+    %Item{
+      stac_version: "1.1.0",
+      stac_extensions: [],
+      type: "Feature",
+      id: granule["title"],
+      collection: collection_id,
+      bbox: bbox,
+      geometry: geometry,
+      properties:
         remove_null_values(%{
           "datetime" => granule["time_start"],
           "start_datetime" => granule["time_start"],
@@ -100,8 +106,8 @@ defmodule Altabarra.Stac.CMRSearch do
           "cmr:data_center" => granule["data_center"],
           "cmr:collection_concept_id" => granule["collection_concept_id"]
         }),
-      "assets" => convert_granule_links_to_assets(granule["links"]),
-      "links" => [
+      assets: convert_granule_links_to_assets(granule["links"]),
+      links: [
         %{
           "rel" => "self",
           "href" =>
@@ -148,20 +154,21 @@ defmodule Altabarra.Stac.CMRSearch do
     end
   end
 
+  @spec convert_collection_to_stac_collection(map(), String.t()) :: Collection.t()
   defp convert_collection_to_stac_collection(collection, base_url) do
     cmr_concept_id = collection["id"]
     bbox = GeoUtils.spatial_to_bbox(collection)
     provider = collection["id"] |> String.split(~r/-/) |> Enum.at(1)
 
-    %{
-      "stac_version" => "1.1.0",
-      "stac_extensions" => [],
-      "type" => "Collection",
-      "id" => collection["short_name"],
-      "license" => "other",
-      "title" => collection["short_name"],
-      "description" => collection["summary"],
-      "extent" => %{
+    %Collection{
+      stac_version: "1.1.0",
+      stac_extensions: [],
+      type: "Collection",
+      id: collection["short_name"],
+      license: "other",
+      title: collection["short_name"],
+      description: collection["summary"],
+      extent: %{
         "spatial" => %{
           # NOTE: STAC Collection bbox is an array of arrays
           "bbox" => [bbox]
@@ -170,14 +177,14 @@ defmodule Altabarra.Stac.CMRSearch do
           "interval" => [[collection["time_start"], collection["time_end"]]]
         }
       },
-      "properties" =>
+      summaries:
         remove_null_values(%{
           "cmr:provider" => provider,
           "cmr:concept_id" => collection["id"],
           "cmr:revision_id" => collection["revision_id"],
           "cmr:dataset_id" => collection["dataset_id"]
         }),
-      "links" => [
+      links: [
         %{
           "rel" => "self",
           "href" => "#{base_url}/#{provider}collections/#{collection["short_name"]}"
@@ -209,7 +216,7 @@ defmodule Altabarra.Stac.CMRSearch do
     }
   end
 
-  defp remove_null_values(%{} = map) do
+  defp remove_null_values(map) do
     Enum.into(
       Enum.reject(map, fn {_k, v} ->
         if is_map(v), do: remove_null_values(v)
@@ -229,31 +236,28 @@ defmodule Altabarra.Stac.CMRSearch do
     end)
   end
 
-  def fetch_providers do
-    case FastCache.get(Altabarra.LRUCache.Default, @providers_cache_key) do
-      nil -> fetch_and_cache_providers()
-      cached_result -> {:ok, decode_cached_result(cached_result)}
-    end
-  end
-
-  def provider_exists?(provider) do
-    with {:ok, providers} <- fetch_providers() do
-      Enum.any?(providers, &(&1 == provider))
-    end
-  end
-
-  defp fetch_and_cache_providers do
+  @doc """
+  Fetches the list of providers from CMR.
+  """
+  defmemo fetch_providers, expires_in: @provider_ttl do
     case get("/search/providers") do
       {:ok, %{status: 200, body: body}} ->
-        provider_ids = extract_provider_ids(body)
-        cache_provider_ids(provider_ids)
-        {:ok, provider_ids}
+        {:ok, extract_provider_ids(body)}
 
       {:ok, %{status: status}} ->
         {:error, "Failed to fetch providers: HTTP #{status}"}
 
       {:error, reason} ->
         {:error, "Request failed: #{inspect(reason)}"}
+    end
+  end
+
+  @doc """
+  Checks if a provider exists in CMR.
+  """
+  defmemo provider_exists?(provider), expires_in: @provider_ttl do
+    with {:ok, providers} <- fetch_providers() do
+      Enum.any?(providers, &(&1 == provider))
     end
   end
 
@@ -265,14 +269,5 @@ defmodule Altabarra.Stac.CMRSearch do
       |> List.first()
       |> Map.get("ShortName")
     end)
-  end
-
-  defp cache_provider_ids(provider_ids) do
-    encoded_ids = :erlang.term_to_binary(provider_ids)
-    FastCache.put(Altabarra.LRUCache.Default, @providers_cache_key, encoded_ids)
-  end
-
-  defp decode_cached_result(cached_result) do
-    :erlang.binary_to_term(cached_result)
   end
 end

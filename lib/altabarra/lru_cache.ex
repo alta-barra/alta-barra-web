@@ -1,7 +1,7 @@
 defmodule Altabarra.LRUCache do
   use GenServer
 
-  @default_max_entries 512
+  @default_max_entries 4096
 
   @moduledoc """
   A simple in-memory Least Recently Used (LRU) cache implemented as a `GenServer`.
