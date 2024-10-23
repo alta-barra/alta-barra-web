@@ -154,7 +154,7 @@ defmodule Altabarra.Stac.CMRSearch do
     end
   end
 
-  @spec convert_collection_to_stac_collection(map(), String.t()) :: Collection.t()
+  @spec convert_collection_to_stac_collection(map(), String.t()) :: Collection
   defp convert_collection_to_stac_collection(collection, base_url) do
     cmr_concept_id = collection["id"]
     bbox = GeoUtils.spatial_to_bbox(collection)
@@ -187,7 +187,7 @@ defmodule Altabarra.Stac.CMRSearch do
       links: [
         %{
           "rel" => "self",
-          "href" => "#{base_url}/#{provider}collections/#{collection["short_name"]}"
+          "href" => "#{base_url}/#{provider}/collections/#{collection["short_name"]}"
         },
         %{
           "rel" => "items",

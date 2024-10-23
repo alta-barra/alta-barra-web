@@ -3,18 +3,19 @@ defmodule AltabarraWeb.StacController do
   import Logger
 
   alias Altabarra.Stac.CMRSearch, as: Stac
+  alias Altabarra.Stac.{Catalog, Collection}
 
   @cmr_page_size_max 2000
+  @stac_version "1.1.0"
 
   def root_catalog(conn, _params) do
     base_url = get_base_url(conn)
 
-    catalog = %{
-      "stac_version" => "1.1.0",
-      "type" => "Catalog",
-      "id" => "alta-barra-stac-api",
-      "description" => "NASA CMR STAC API by Alta Barra.",
-      "links" =>
+    catalog = %Catalog{
+      stac_version: @stac_version,
+      id: "alta-barra-stac-api",
+      description: "NASA CMR STAC API by Alta Barra.",
+      links:
         [
           %{
             "rel" => "self",
@@ -48,13 +49,12 @@ defmodule AltabarraWeb.StacController do
 
     case Stac.provider_exists?(provider) do
       true ->
-        catalog = %{
-          "type" => "Catalog",
-          "stac_version" => "1.1.0",
-          "id" => "#{provider}",
-          "description" =>
-            "#{provider} Please reference the official https://cmr.earthdata.nasa.gov/stac for any production based uses.",
-          "links" =>
+        catalog = %Catalog{
+          stac_version: @stac_version,
+          id: provider,
+          description:
+            "#{provider} STAC Catalog as derived from the NASA Common Metadata Repository.",
+          links:
             [
               %{
                 "rel" => "self",
@@ -90,7 +90,7 @@ defmodule AltabarraWeb.StacController do
     case Stac.search_collections(%{provider: provider, page_size: @cmr_page_size_max}, base_url) do
       {:ok, collections} ->
         collections
-        |> Enum.map(fn %{"id" => id} ->
+        |> Enum.map(fn %Collection{id: id} ->
           %{
             "rel" => "child",
             "href" => "#{base_url}/#{provider}/collections/#{id}",
@@ -151,7 +151,7 @@ defmodule AltabarraWeb.StacController do
     # First, we need to get the collection's concept_id
     case Stac.search_collections(%{"short_name" => collection_id}, base_url) do
       {:ok, [collection | _]} ->
-        collection_concept_id = collection["properties"]["cmr:concept_id"]
+        collection_concept_id = collection.summaries["cmr:concept_id"]
 
         params =
           params
@@ -185,7 +185,7 @@ defmodule AltabarraWeb.StacController do
 
     case Stac.search_collections(%{"short_name" => collection_id}, base_url) do
       {:ok, [collection | _]} ->
-        concept_id = collection["properties"]["cmr:concept_id"]
+        concept_id = collection.summaries["cmr:concept_id"]
 
         case Stac.search_items(%{"granule_ur" => item_id, "collection" => concept_id}, base_url) do
           {:ok, [item | _]} ->

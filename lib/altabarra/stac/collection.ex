@@ -2,6 +2,7 @@ defmodule Altabarra.Stac.Collection do
   @moduledoc """
   Defines a STAC Collection.
   """
+  @derive Jason.Encoder
   defstruct type: "Collection",
             stac_version: "1.0.0",
             stac_extensions: [],
