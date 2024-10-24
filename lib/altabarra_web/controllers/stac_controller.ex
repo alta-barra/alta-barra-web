@@ -4,6 +4,7 @@ defmodule AltabarraWeb.StacController do
 
   alias Altabarra.Stac.CMRSearch, as: Stac
   alias Altabarra.Stac.{Catalog, Collection}
+  alias Altabarra.Utils
 
   @cmr_page_size_max 2000
   @stac_version "1.1.0"
@@ -93,7 +94,7 @@ defmodule AltabarraWeb.StacController do
         |> Enum.map(fn %Collection{id: id} ->
           %{
             "rel" => "child",
-            "href" => "#{base_url}/#{provider}/collections/#{id}",
+            "href" => "#{base_url}/#{provider}/collections/#{Utils.encode(id)}",
             "type" => "application/json"
           }
         end)

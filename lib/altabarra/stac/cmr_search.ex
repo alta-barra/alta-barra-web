@@ -5,6 +5,7 @@ defmodule Altabarra.Stac.CMRSearch do
 
   alias Altabarra.LRUCache, as: FastCache
   alias Altabarra.Stac.{Item, Collection, GeoUtils}
+  alias Altabarra.Utils
 
   use Tesla
   use Memoize
@@ -111,15 +112,15 @@ defmodule Altabarra.Stac.CMRSearch do
         %{
           "rel" => "self",
           "href" =>
-            "#{base_url}/#{provider}/collections/#{collection_id}/items/#{granule["title"]}"
+            "#{base_url}/#{provider}/collections/#{Utils.encode(collection_id)}/items/#{granule["title"]}"
         },
         %{
           "rel" => "parent",
-          "href" => "#{base_url}/#{provider}/collections/#{collection_id}"
+          "href" => "#{base_url}/#{provider}/collections/#{Utils.encode(collection_id)}"
         },
         %{
           "rel" => "collection",
-          "href" => "#{base_url}/#{provider}/collections/#{collection_id}"
+          "href" => "#{base_url}/#{provider}/collections/#{Utils.encode(collection_id)}"
         },
         %{
           "rel" => "via",
@@ -179,19 +180,23 @@ defmodule Altabarra.Stac.CMRSearch do
       },
       summaries:
         remove_null_values(%{
-          "cmr:provider" => provider,
-          "cmr:concept_id" => collection["id"],
-          "cmr:revision_id" => collection["revision_id"],
-          "cmr:dataset_id" => collection["dataset_id"]
+          "cmr" => %{
+            "cmr:provider" => provider,
+            "cmr:concept_id" => collection["id"],
+            "cmr:revision_id" => collection["revision_id"],
+            "cmr:dataset_id" => collection["dataset_id"]
+          }
         }),
       links: [
         %{
           "rel" => "self",
-          "href" => "#{base_url}/#{provider}/collections/#{collection["short_name"]}"
+          "href" =>
+            "#{base_url}/#{provider}/collections/#{Utils.encode(collection["short_name"])}"
         },
         %{
           "rel" => "items",
-          "href" => "#{base_url}/#{provider}/collections/#{collection["short_name"]}/items"
+          "href" =>
+            "#{base_url}/#{provider}/collections/#{Utils.encode(collection["short_name"])}/items"
         },
         %{"rel" => "root", "href" => base_url},
         %{
