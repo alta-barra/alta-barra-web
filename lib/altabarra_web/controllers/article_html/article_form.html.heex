@@ -1,0 +1,25 @@
+<.simple_form :let={f} for={@changeset} action={@action}>
+  <.error :if={@changeset.action}>
+    Oops, something went wrong! Please check the errors below.
+  </.error>
+  <.input field={f[:title]} type="text" label="Title" />
+  <.input field={f[:slug]} type="text" label="Slug" />
+  <.input field={f[:description]} type="textarea" label="Description" />
+  <.input field={f[:content]} type="textarea" label="Content" />
+  <.input field={f[:type]} type="select" label="Content Type" 
+                options={[
+                  {"Article", "article"},
+                  {"Opinion", "opinion"},
+                  {"How-to Guide", "how-to"},
+                  {"News", "news"}
+                ]} />
+  <.input field={f[:status]} type="text" label="Status" />
+  <.input field={f[:published_at]} type="datetime-local" label="Published at" />
+  <.input field={f[:featured]} type="checkbox" label="Featured" />
+  <.input field={f[:meta_title]} type="text" label="Meta title" />
+  <.input field={f[:meta_description]} type="text" label="Meta description" />
+  <.input field={f[:reading_time]} type="number" label="Reading time" />
+  <:actions>
+    <.button>Save Article</.button>
+  </:actions>
+</.simple_form>

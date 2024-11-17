@@ -1,0 +1,12 @@
+<.simple_form :let={f} for={@changeset} action={@action}>
+  <.error :if={@changeset.action}>
+    Oops, something went wrong! Please check the errors below.
+  </.error>
+  <.input field={f[:source]} type="text" label="Source" />
+  <.input field={f[:status]} type="text" label="Status" />
+  <.input field={f[:notes]} type="text" label="Notes" />
+  <.input field={f[:verified_at]} type="datetime-local" label="Verified at" />
+  <:actions>
+    <.button>Save Fact check</.button>
+  </:actions>
+</.simple_form>

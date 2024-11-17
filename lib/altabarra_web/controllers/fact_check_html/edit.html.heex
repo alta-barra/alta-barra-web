@@ -1,0 +1,8 @@
+<.header>
+  Edit Fact check <%= @fact_check.id %>
+  <:subtitle>Use this form to manage fact_check records in your database.</:subtitle>
+</.header>
+
+<.fact_check_form changeset={@changeset} action={~p"/fact_checks/#{@fact_check}"} />
+
+<.back navigate={~p"/fact_checks"}>Back to fact_checks</.back>

@@ -1,0 +1,25 @@
+<.header>
+  Article <%= @article.id %>
+  <:subtitle>This is a article record from your database.</:subtitle>
+  <:actions>
+    <.link href={~p"/articles/#{@article}/edit"}>
+      <.button>Edit article</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Slug"><%= @article.slug %></:item>
+  <:item title="Title"><%= @article.title %></:item>
+  <:item title="Description"><%= @article.description %></:item>
+  <:item title="Content"><%= @article.content %></:item>
+  <:item title="Type"><%= @article.type %></:item>
+  <:item title="Status"><%= @article.status %></:item>
+  <:item title="Published at"><%= @article.published_at %></:item>
+  <:item title="Featured"><%= @article.featured %></:item>
+  <:item title="Meta title"><%= @article.meta_title %></:item>
+  <:item title="Meta description"><%= @article.meta_description %></:item>
+  <:item title="Reading time"><%= @article.reading_time %></:item>
+</.list>
+
+<.back navigate={~p"/articles"}>Back to articles</.back>

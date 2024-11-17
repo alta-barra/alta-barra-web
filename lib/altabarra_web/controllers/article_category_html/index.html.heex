@@ -1,0 +1,22 @@
+<.header>
+  Listing Article categories
+  <:actions>
+    <.link href={~p"/article_categories/new"}>
+      <.button>New Article category</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table id="article_categories" rows={@article_categories} row_click={&JS.navigate(~p"/article_categories/#{&1}")}>
+  <:action :let={article_category}>
+    <div class="sr-only">
+      <.link navigate={~p"/article_categories/#{article_category}"}>Show</.link>
+    </div>
+    <.link navigate={~p"/article_categories/#{article_category}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={article_category}>
+    <.link href={~p"/article_categories/#{article_category}"} method="delete" data-confirm="Are you sure?">
+      Delete
+    </.link>
+  </:action>
+</.table>

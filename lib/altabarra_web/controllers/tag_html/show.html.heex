@@ -1,0 +1,17 @@
+<.header>
+  Tag <%= @tag.id %>
+  <:subtitle>This is a tag record from your database.</:subtitle>
+  <:actions>
+    <.link href={~p"/tags/#{@tag}/edit"}>
+      <.button>Edit tag</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name"><%= @tag.name %></:item>
+  <:item title="Slug"><%= @tag.slug %></:item>
+  <:item title="Description"><%= @tag.description %></:item>
+</.list>
+
+<.back navigate={~p"/tags"}>Back to tags</.back>

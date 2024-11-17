@@ -1,20 +1,24 @@
 <nav class="px-4 sm:px-6 lg:px-8 flex space-x-6">
-  <div class="items-center gap-4 font-semibold leading-6 text-zinc-900">
-    <a href={~p"/"}> Home </a>
-  </div>
-  <div class="items-center gap-4 font-semibold leading-6 text-zinc-900">
-    <a href={~p"/services"}> Services </a>
-  </div>
-  <div class="items-center gap-4 font-semibold leading-6 text-zinc-900">
-    <a href={~p"/apis"}> APIs </a>
-  </div>
-  <div class="items-center gap-4 font-semibold leading-6 text-zinc-900">
-    <a href={~p"/contact"}> Contact </a>
+  <div class="flex items-center space-x-6">
+    <%= for {label, path} <- [
+      {"Home", ~p"/"},
+      {"Services", ~p"/services"},
+      {"APIs", ~p"/apis"},
+      {"Contact", ~p"/contact"},
+      {"Blog", ~p"/blog"}
+    ] do %>
+      <a 
+        href={path}
+        class="font-semibold leading-6 text-zinc-900 hover:text-zinc-700 transition-colors"
+      >
+        <%= label %>
+      </a>
+    <% end %>
   </div>
 </nav>
 
 <main class="px-4 py-20 sm:px-6 lg:px-8">
-  <div class="mx-auto">
+  <div class="mx-auto max-w-7xl">
     <.flash_group flash={@flash} />
     <%= @inner_content %>
   </div>

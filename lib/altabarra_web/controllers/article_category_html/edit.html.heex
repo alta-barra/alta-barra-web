@@ -1,0 +1,8 @@
+<.header>
+  Edit Article category <%= @article_category.id %>
+  <:subtitle>Use this form to manage article_category records in your database.</:subtitle>
+</.header>
+
+<.article_category_form changeset={@changeset} action={~p"/article_categories/#{@article_category}"} />
+
+<.back navigate={~p"/article_categories"}>Back to article_categories</.back>

@@ -27,6 +27,17 @@ defmodule AltabarraWeb.Router do
   end
 
   scope "/", AltabarraWeb do
+    pipe_through [:browser, :require_authenticated_user, :admin]
+
+    resources "/articles", ArticleController
+    resources "/fact_checks", FactCheckController
+    resources "/tags", TagController
+    resources "/article_categories", ArticleCategoryController
+    resources "/categories", CategoryController
+    resources "/article_tags", ArticleTagController
+  end
+
+  scope "/", AltabarraWeb do
     pipe_through :browser
 
     get "/", PageController, :home
@@ -34,6 +45,8 @@ defmodule AltabarraWeb.Router do
     get "/contact", PageController, :contact
     get "/services", PageController, :services
     get "/apis", PageController, :apis
+
+    resources "/blog", BlogController, only: [:index, :show]
   end
 
   scope "/api/stac", AltabarraWeb do
@@ -93,7 +106,6 @@ defmodule AltabarraWeb.Router do
     end
   end
 
-  # Development routes
   if Application.compile_env(:altabarra, :dev_routes) do
     import Phoenix.LiveDashboard.Router
 

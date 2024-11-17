@@ -1,0 +1,8 @@
+<.header>
+  Edit Article tag <%= @article_tag.id %>
+  <:subtitle>Use this form to manage article_tag records in your database.</:subtitle>
+</.header>
+
+<.article_tag_form changeset={@changeset} action={~p"/article_tags/#{@article_tag}"} />
+
+<.back navigate={~p"/article_tags"}>Back to article_tags</.back>

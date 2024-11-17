@@ -1,0 +1,8 @@
+<.header>
+  Edit Article <%= @article.id %>
+  <:subtitle>Use this form to manage article records in your database.</:subtitle>
+</.header>
+
+<.article_form changeset={@changeset} action={~p"/articles/#{@article}"} />
+
+<.back navigate={~p"/articles"}>Back to articles</.back>

@@ -1,0 +1,22 @@
+<.header>
+  Listing Article tags
+  <:actions>
+    <.link href={~p"/article_tags/new"}>
+      <.button>New Article tag</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table id="article_tags" rows={@article_tags} row_click={&JS.navigate(~p"/article_tags/#{&1}")}>
+  <:action :let={article_tag}>
+    <div class="sr-only">
+      <.link navigate={~p"/article_tags/#{article_tag}"}>Show</.link>
+    </div>
+    <.link navigate={~p"/article_tags/#{article_tag}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={article_tag}>
+    <.link href={~p"/article_tags/#{article_tag}"} method="delete" data-confirm="Are you sure?">
+      Delete
+    </.link>
+  </:action>
+</.table>

@@ -1,0 +1,14 @@
+<.header>
+  Article category <%= @article_category.id %>
+  <:subtitle>This is a article_category record from your database.</:subtitle>
+  <:actions>
+    <.link href={~p"/article_categories/#{@article_category}/edit"}>
+      <.button>Edit article_category</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+</.list>
+
+<.back navigate={~p"/article_categories"}>Back to article_categories</.back>
