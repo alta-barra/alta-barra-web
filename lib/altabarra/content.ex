@@ -22,6 +22,16 @@ defmodule Altabarra.Content do
   end
 
   @doc """
+  Get all posts that are in the "published" state.
+  """
+  def list_published_posts do
+    Article
+    |> where([a], a.status == :published)
+    |> order_by([p], desc: p.published_at)
+    |> Repo.all()
+  end
+
+  @doc """
   Gets a single article.
 
   Raises `Ecto.NoResultsError` if the Article does not exist.

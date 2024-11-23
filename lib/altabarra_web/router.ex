@@ -47,6 +47,8 @@ defmodule AltabarraWeb.Router do
     get "/apis", PageController, :apis
 
     resources "/blog", BlogController, only: [:index, :show]
+
+    get "/sitemap.xml", SitemapController, :index
   end
 
   scope "/api/stac", AltabarraWeb do

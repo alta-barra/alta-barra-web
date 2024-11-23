@@ -17,7 +17,7 @@ defmodule AltabarraWeb do
   those modules here.
   """
 
-  def static_paths, do: ~w(assets fonts images favicon.ico robots.txt sitemap.xml)
+  def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
 
   def router do
     quote do
@@ -39,7 +39,7 @@ defmodule AltabarraWeb do
   def controller do
     quote do
       use Phoenix.Controller,
-        formats: [:html, :json],
+        formats: [:html, :json, :xml],
         layouts: [html: AltabarraWeb.Layouts]
 
       import Plug.Conn
@@ -63,6 +63,16 @@ defmodule AltabarraWeb do
       use Phoenix.LiveComponent
 
       unquote(html_helpers())
+    end
+  end
+
+  def xml do
+    quote do
+      use Phoenix.Component
+
+      # Import convenience functions from controllers
+      import Phoenix.Controller,
+        only: [get_csrf_token: 0, view_module: 1, view_template: 1]
     end
   end
 
