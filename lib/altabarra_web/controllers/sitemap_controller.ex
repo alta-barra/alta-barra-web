@@ -23,15 +23,25 @@ defmodule AltabarraWeb.SitemapController do
   end
 
   defp get_static_pages() do
-    ["", "contact", "services", "blog", "apis"]
+    child_pages = ["contact", "services", "blog", "apis"]
     |> Enum.map(fn path ->
       %{
 	url: ~p"/#{path}",
 	updated_at: DateTime.utc_now(),
 	changefreq: "monthly",
-	priority: 1.0
+	priority: 0.9
       }
-      end)
+    end)
+
+    index_page = 
+    %{	url: ~p"/",
+	updated_at: DateTime.utc_now(),
+	changefreq: "monthly",
+	priority: 1.0
+     }
+
+    [index_page]++ child_pages
+    
   end
   
   defp to_sitemap_entry(post) do
@@ -39,7 +49,7 @@ defmodule AltabarraWeb.SitemapController do
       url: ~p"/blog/#{post.slug}",
       updated_at: post.updated_at || post.published_at,
       changefreq: "weekly",
-      priority: 0.8
+      priority: 0.6
     }
   end
 end
