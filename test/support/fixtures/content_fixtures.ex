@@ -67,9 +67,7 @@ defmodule Altabarra.ContentFixtures do
   def article_tag_fixture(attrs \\ %{}) do
     {:ok, article_tag} =
       attrs
-      |> Enum.into(%{
-
-      })
+      |> Enum.into(%{})
       |> Altabarra.Content.create_article_tag()
 
     article_tag
@@ -97,9 +95,7 @@ defmodule Altabarra.ContentFixtures do
   def article_category_fixture(attrs \\ %{}) do
     {:ok, article_category} =
       attrs
-      |> Enum.into(%{
-
-      })
+      |> Enum.into(%{})
       |> Altabarra.Content.create_article_category()
 
     article_category

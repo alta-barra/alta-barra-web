@@ -8,7 +8,19 @@ defmodule Altabarra.ContentTest do
 
     import Altabarra.ContentFixtures
 
-    @invalid_attrs %{status: nil, type: nil, description: nil, title: nil, slug: nil, content: nil, published_at: nil, featured: nil, meta_title: nil, meta_description: nil, reading_time: nil}
+    @invalid_attrs %{
+      status: nil,
+      type: nil,
+      description: nil,
+      title: nil,
+      slug: nil,
+      content: nil,
+      published_at: nil,
+      featured: nil,
+      meta_title: nil,
+      meta_description: nil,
+      reading_time: nil
+    }
 
     test "list_articles/0 returns all articles" do
       article = article_fixture()
@@ -21,7 +33,19 @@ defmodule Altabarra.ContentTest do
     end
 
     test "create_article/1 with valid data creates a article" do
-      valid_attrs = %{status: "some status", type: "some type", description: "some description", title: "some title", slug: "some slug", content: "some content", published_at: ~U[2024-11-15 14:56:00Z], featured: true, meta_title: "some meta_title", meta_description: "some meta_description", reading_time: 42}
+      valid_attrs = %{
+        status: "some status",
+        type: "some type",
+        description: "some description",
+        title: "some title",
+        slug: "some slug",
+        content: "some content",
+        published_at: ~U[2024-11-15 14:56:00Z],
+        featured: true,
+        meta_title: "some meta_title",
+        meta_description: "some meta_description",
+        reading_time: 42
+      }
 
       assert {:ok, %Article{} = article} = Content.create_article(valid_attrs)
       assert article.status == "some status"
@@ -43,7 +67,20 @@ defmodule Altabarra.ContentTest do
 
     test "update_article/2 with valid data updates the article" do
       article = article_fixture()
-      update_attrs = %{status: "some updated status", type: "some updated type", description: "some updated description", title: "some updated title", slug: "some updated slug", content: "some updated content", published_at: ~U[2024-11-16 14:56:00Z], featured: false, meta_title: "some updated meta_title", meta_description: "some updated meta_description", reading_time: 43}
+
+      update_attrs = %{
+        status: "some updated status",
+        type: "some updated type",
+        description: "some updated description",
+        title: "some updated title",
+        slug: "some updated slug",
+        content: "some updated content",
+        published_at: ~U[2024-11-16 14:56:00Z],
+        featured: false,
+        meta_title: "some updated meta_title",
+        meta_description: "some updated meta_description",
+        reading_time: 43
+      }
 
       assert {:ok, %Article{} = article} = Content.update_article(article, update_attrs)
       assert article.status == "some updated status"
@@ -95,7 +132,12 @@ defmodule Altabarra.ContentTest do
     end
 
     test "create_fact_check/1 with valid data creates a fact_check" do
-      valid_attrs = %{status: "some status", source: "some source", notes: "some notes", verified_at: ~U[2024-11-15 14:58:00Z]}
+      valid_attrs = %{
+        status: "some status",
+        source: "some source",
+        notes: "some notes",
+        verified_at: ~U[2024-11-15 14:58:00Z]
+      }
 
       assert {:ok, %FactCheck{} = fact_check} = Content.create_fact_check(valid_attrs)
       assert fact_check.status == "some status"
@@ -110,9 +152,17 @@ defmodule Altabarra.ContentTest do
 
     test "update_fact_check/2 with valid data updates the fact_check" do
       fact_check = fact_check_fixture()
-      update_attrs = %{status: "some updated status", source: "some updated source", notes: "some updated notes", verified_at: ~U[2024-11-16 14:58:00Z]}
 
-      assert {:ok, %FactCheck{} = fact_check} = Content.update_fact_check(fact_check, update_attrs)
+      update_attrs = %{
+        status: "some updated status",
+        source: "some updated source",
+        notes: "some updated notes",
+        verified_at: ~U[2024-11-16 14:58:00Z]
+      }
+
+      assert {:ok, %FactCheck{} = fact_check} =
+               Content.update_fact_check(fact_check, update_attrs)
+
       assert fact_check.status == "some updated status"
       assert fact_check.source == "some updated source"
       assert fact_check.notes == "some updated notes"
@@ -169,7 +219,12 @@ defmodule Altabarra.ContentTest do
 
     test "update_tag/2 with valid data updates the tag" do
       tag = tag_fixture()
-      update_attrs = %{name: "some updated name", description: "some updated description", slug: "some updated slug"}
+
+      update_attrs = %{
+        name: "some updated name",
+        description: "some updated description",
+        slug: "some updated slug"
+      }
 
       assert {:ok, %Tag{} = tag} = Content.update_tag(tag, update_attrs)
       assert tag.name == "some updated name"
@@ -226,7 +281,8 @@ defmodule Altabarra.ContentTest do
       article_tag = article_tag_fixture()
       update_attrs = %{}
 
-      assert {:ok, %ArticleTag{} = article_tag} = Content.update_article_tag(article_tag, update_attrs)
+      assert {:ok, %ArticleTag{} = article_tag} =
+               Content.update_article_tag(article_tag, update_attrs)
     end
 
     test "update_article_tag/2 with invalid data returns error changeset" do
@@ -279,7 +335,12 @@ defmodule Altabarra.ContentTest do
 
     test "update_category/2 with valid data updates the category" do
       category = category_fixture()
-      update_attrs = %{name: "some updated name", description: "some updated description", slug: "some updated slug"}
+
+      update_attrs = %{
+        name: "some updated name",
+        description: "some updated description",
+        slug: "some updated slug"
+      }
 
       assert {:ok, %Category{} = category} = Content.update_category(category, update_attrs)
       assert category.name == "some updated name"
@@ -325,7 +386,8 @@ defmodule Altabarra.ContentTest do
     test "create_article_category/1 with valid data creates a article_category" do
       valid_attrs = %{}
 
-      assert {:ok, %ArticleCategory{} = article_category} = Content.create_article_category(valid_attrs)
+      assert {:ok, %ArticleCategory{} = article_category} =
+               Content.create_article_category(valid_attrs)
     end
 
     test "create_article_category/1 with invalid data returns error changeset" do
@@ -336,19 +398,26 @@ defmodule Altabarra.ContentTest do
       article_category = article_category_fixture()
       update_attrs = %{}
 
-      assert {:ok, %ArticleCategory{} = article_category} = Content.update_article_category(article_category, update_attrs)
+      assert {:ok, %ArticleCategory{} = article_category} =
+               Content.update_article_category(article_category, update_attrs)
     end
 
     test "update_article_category/2 with invalid data returns error changeset" do
       article_category = article_category_fixture()
-      assert {:error, %Ecto.Changeset{}} = Content.update_article_category(article_category, @invalid_attrs)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Content.update_article_category(article_category, @invalid_attrs)
+
       assert article_category == Content.get_article_category!(article_category.id)
     end
 
     test "delete_article_category/1 deletes the article_category" do
       article_category = article_category_fixture()
       assert {:ok, %ArticleCategory{}} = Content.delete_article_category(article_category)
-      assert_raise Ecto.NoResultsError, fn -> Content.get_article_category!(article_category.id) end
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Content.get_article_category!(article_category.id)
+      end
     end
 
     test "change_article_category/1 returns a article_category changeset" do

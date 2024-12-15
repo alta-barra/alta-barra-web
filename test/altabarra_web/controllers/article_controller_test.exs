@@ -3,9 +3,45 @@ defmodule AltabarraWeb.ArticleControllerTest do
 
   import Altabarra.ContentFixtures
 
-  @create_attrs %{status: "some status", type: "some type", description: "some description", title: "some title", slug: "some slug", content: "some content", published_at: ~U[2024-11-15 14:56:00Z], featured: true, meta_title: "some meta_title", meta_description: "some meta_description", reading_time: 42}
-  @update_attrs %{status: "some updated status", type: "some updated type", description: "some updated description", title: "some updated title", slug: "some updated slug", content: "some updated content", published_at: ~U[2024-11-16 14:56:00Z], featured: false, meta_title: "some updated meta_title", meta_description: "some updated meta_description", reading_time: 43}
-  @invalid_attrs %{status: nil, type: nil, description: nil, title: nil, slug: nil, content: nil, published_at: nil, featured: nil, meta_title: nil, meta_description: nil, reading_time: nil}
+  @create_attrs %{
+    status: "some status",
+    type: "some type",
+    description: "some description",
+    title: "some title",
+    slug: "some slug",
+    content: "some content",
+    published_at: ~U[2024-11-15 14:56:00Z],
+    featured: true,
+    meta_title: "some meta_title",
+    meta_description: "some meta_description",
+    reading_time: 42
+  }
+  @update_attrs %{
+    status: "some updated status",
+    type: "some updated type",
+    description: "some updated description",
+    title: "some updated title",
+    slug: "some updated slug",
+    content: "some updated content",
+    published_at: ~U[2024-11-16 14:56:00Z],
+    featured: false,
+    meta_title: "some updated meta_title",
+    meta_description: "some updated meta_description",
+    reading_time: 43
+  }
+  @invalid_attrs %{
+    status: nil,
+    type: nil,
+    description: nil,
+    title: nil,
+    slug: nil,
+    content: nil,
+    published_at: nil,
+    featured: nil,
+    meta_title: nil,
+    meta_description: nil,
+    reading_time: nil
+  }
 
   describe "index" do
     test "lists all articles", %{conn: conn} do

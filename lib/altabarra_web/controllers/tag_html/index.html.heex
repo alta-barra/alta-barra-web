@@ -8,9 +8,9 @@
 </.header>
 
 <.table id="tags" rows={@tags} row_click={&JS.navigate(~p"/tags/#{&1}")}>
-  <:col :let={tag} label="Name"><%= tag.name %></:col>
-  <:col :let={tag} label="Slug"><%= tag.slug %></:col>
-  <:col :let={tag} label="Description"><%= tag.description %></:col>
+  <:col :let={tag} label="Name">{tag.name}</:col>
+  <:col :let={tag} label="Slug">{tag.slug}</:col>
+  <:col :let={tag} label="Description">{tag.description}</:col>
   <:action :let={tag}>
     <div class="sr-only">
       <.link navigate={~p"/tags/#{tag}"}>Show</.link>

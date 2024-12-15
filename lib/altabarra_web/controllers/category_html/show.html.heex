@@ -1,5 +1,5 @@
 <.header>
-  Category <%= @category.id %>
+  Category {@category.id}
   <:subtitle>This is a category record from your database.</:subtitle>
   <:actions>
     <.link href={~p"/categories/#{@category}/edit"}>
@@ -9,9 +9,9 @@
 </.header>
 
 <.list>
-  <:item title="Name"><%= @category.name %></:item>
-  <:item title="Slug"><%= @category.slug %></:item>
-  <:item title="Description"><%= @category.description %></:item>
+  <:item title="Name">{@category.name}</:item>
+  <:item title="Slug">{@category.slug}</:item>
+  <:item title="Description">{@category.description}</:item>
 </.list>
 
 <.back navigate={~p"/categories"}>Back to categories</.back>

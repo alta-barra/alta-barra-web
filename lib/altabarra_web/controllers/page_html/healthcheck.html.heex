@@ -39,11 +39,11 @@
 <% end %>
 
 <div class="flex flex-col">
-  <%= AltabarraWeb.AnalyticsComponents.render_table(%{
+  {AltabarraWeb.AnalyticsComponents.render_table(%{
     title: "Services",
     headers: ["Service", "Status"],
     rows: @services_status
-  }) %>
+  })}
 </div>
 
 <.flash_group flash={@flash} />

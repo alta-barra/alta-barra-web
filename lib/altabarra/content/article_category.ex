@@ -3,7 +3,6 @@ defmodule Altabarra.Content.ArticleCategory do
   import Ecto.Changeset
 
   schema "article_categories" do
-
     field :article_id, :id
     field :category_id, :id
 

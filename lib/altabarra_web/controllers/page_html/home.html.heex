@@ -1,6 +1,6 @@
 <!-- Nav Section -->
 <nav class="px-4 sm:px-6 lg:px-8 flex space-x-6">
-    <div class="flex items-center space-x-6">
+  <div class="flex items-center space-x-6">
     <%= for {label, path} <- [
       {"Home", ~p"/"},
       {"Services", ~p"/services"},
@@ -8,11 +8,11 @@
       {"Contact", ~p"/contact"},
       {"Blog", ~p"/blog"}
     ] do %>
-      <a 
+      <a
         href={path}
         class="font-semibold leading-6 text-zinc-900 hover:text-zinc-700 transition-colors"
       >
-        <%= label %>
+        {label}
       </a>
     <% end %>
   </div>

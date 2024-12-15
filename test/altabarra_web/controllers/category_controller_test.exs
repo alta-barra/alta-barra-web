@@ -4,7 +4,11 @@ defmodule AltabarraWeb.CategoryControllerTest do
   import Altabarra.ContentFixtures
 
   @create_attrs %{name: "some name", description: "some description", slug: "some slug"}
-  @update_attrs %{name: "some updated name", description: "some updated description", slug: "some updated slug"}
+  @update_attrs %{
+    name: "some updated name",
+    description: "some updated description",
+    slug: "some updated slug"
+  }
   @invalid_attrs %{name: nil, description: nil, slug: nil}
 
   describe "index" do

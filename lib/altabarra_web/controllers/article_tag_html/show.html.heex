@@ -1,5 +1,5 @@
 <.header>
-  Article tag <%= @article_tag.id %>
+  Article tag {@article_tag.id}
   <:subtitle>This is a article_tag record from your database.</:subtitle>
   <:actions>
     <.link href={~p"/article_tags/#{@article_tag}/edit"}>
@@ -8,7 +8,6 @@
   </:actions>
 </.header>
 
-<.list>
-</.list>
+<.list></.list>
 
 <.back navigate={~p"/article_tags"}>Back to article_tags</.back>

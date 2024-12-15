@@ -1,4 +1,6 @@
 defmodule AltabarraWeb.ArticleFormHelpers do
+  alias Altabarra.Content.Article
+
   def form_title(changeset) do
     case Ecto.Changeset.get_field(changeset, :status) do
       :draft -> "Draft Article"
@@ -13,10 +15,8 @@ defmodule AltabarraWeb.ArticleFormHelpers do
   def status_options(changeset) do
     current_status = Ecto.Changeset.get_field(changeset, :status)
 
-    Altabarra.Content.Article.valid_transitions(current_status)
-    |> Enum.map(fn status ->
-      {status_label(status), status}
-    end)
+    Article.valid_transitions(current_status)
+    |> Enum.map(fn status -> {status_label(status), status} end)
   end
 
   def status_label(status) do
@@ -30,14 +30,15 @@ defmodule AltabarraWeb.ArticleFormHelpers do
     end
   end
 
-  def submit_button_text(changeset) do
-    case Ecto.Changeset.get_field(changeset, :status) do
-      :draft -> "Save Draft"
-      :in_review -> "Submit for Review"
-      :scheduled -> "Schedule"
-      :published -> "Update"
-      :unpublished -> "Save Changes"
-      :archived -> "Archive"
+  def transition_button_text(from, to) do
+    case {from, to} do
+      {state, state} -> "Save Changes"
+      {_from, :in_review} -> "Submit for Review"
+      {_from, :published} -> "Publish"
+      {_from, :unpublished} -> "Unpublish"
+      {_from, :archived} -> "Archive"
+      {_from, :scheduled} -> "Schedule"
+      {_from, :draft} -> "Return to Draft"
     end
   end
 
@@ -48,7 +49,7 @@ defmodule AltabarraWeb.ArticleFormHelpers do
 
   def min_schedule_time do
     DateTime.utc_now()
-    |> DateTime.add(15, :minute)
+    |> DateTime.add(60, :minute)
     |> DateTime.to_iso8601()
   end
 
@@ -70,9 +71,12 @@ defmodule AltabarraWeb.ArticleFormHelpers do
     case Ecto.Changeset.get_field(changeset, :status) do
       :published ->
         "This article is currently published. Any changes will be immediately visible to readers."
+
       :scheduled ->
         scheduled_for = Ecto.Changeset.get_field(changeset, :scheduled_for)
+
         "This article is scheduled to be published on #{Calendar.strftime(scheduled_for, "%B %d, %Y at %I:%M %p UTC")}"
+
       _ ->
         nil
     end

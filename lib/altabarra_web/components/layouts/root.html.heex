@@ -4,27 +4,37 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
-    
+
     <%!-- Title and Assets --%>
     <.live_title suffix=" · Software Services">
-      <%= assigns[:page_title] || "Alta Barra" %>
+      {assigns[:page_title] || "Alta Barra"}
     </.live_title>
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
-    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}></script>
-    
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
+    </script>
+
     <%!-- SEO Meta Tags --%>
-    <meta name="description" content="Alta Barra offers expert software and cloud engineering services tailored for smaller projects and ongoing maintenance." />
-    <meta name="keywords" content="software services, cloud engineering, software maintenance, Alta Barra" />
+    <meta
+      name="description"
+      content="Alta Barra offers expert software and cloud engineering services tailored for smaller projects and ongoing maintenance."
+    />
+    <meta
+      name="keywords"
+      content="software services, cloud engineering, software maintenance, Alta Barra"
+    />
     <meta name="robots" content="index,follow" />
-    
+
     <%!-- Open Graph Tags --%>
     <meta property="og:site_name" content="Alta Barra" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:title" content={assigns[:og_title] || "Alta Barra Software"} />
-    <meta property="og:description" content={assigns[:og_description] || "Home of Alta Barra software and cloud engineering."} />
+    <meta
+      property="og:description"
+      content={assigns[:og_description] || "Home of Alta Barra software and cloud engineering."}
+    />
     <meta property="og:url" content={Phoenix.Controller.current_url(@conn)} />
     <meta property="og:type" content="website" />
-    
+
     <%!-- Structured Data --%>
     <script type="application/ld+json">
       {
@@ -34,13 +44,16 @@
         "url": "<%= Phoenix.Controller.current_url(@conn) %>"
       }
     </script>
-    
+
     <%!-- Fonts --%>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@200;400;600&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@200;400;600&display=swap"
+      rel="stylesheet"
+    />
   </head>
-  
+
   <body class="bg-white antialiased min-h-screen flex flex-col">
     <%!-- User Navigation --%>
     <header class="relative z-10 px-4 sm:px-6 lg:px-8">
@@ -48,7 +61,7 @@
         <ul class="flex items-center gap-4">
           <%= if @current_user do %>
             <li class="hidden md:block text-sm leading-6 text-zinc-900">
-              <%= @current_user.email %>
+              {@current_user.email}
               <%= if @current_user.role == "admin" do %>
                 <span class="pl-1 text-red-500 font-bold">[ADMIN]</span>
               <% end %>
@@ -56,30 +69,46 @@
 
             <%= if @current_user.role == "admin" do %>
               <li>
-                <.link href={~p"/admin/analytics"} class="text-sm leading-6 text-zinc-900 font-semibold hover:text-zinc-700">
+                <.link
+                  href={~p"/admin/analytics"}
+                  class="text-sm leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+                >
                   Analytics
                 </.link>
               </li>
             <% end %>
 
             <li>
-              <.link href={~p"/users/settings"} class="text-sm leading-6 text-zinc-900 font-semibold hover:text-zinc-700">
+              <.link
+                href={~p"/users/settings"}
+                class="text-sm leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+              >
                 Settings
               </.link>
             </li>
             <li>
-              <.link href={~p"/users/log_out"} method="delete" class="text-sm leading-6 text-zinc-900 font-semibold hover:text-zinc-700">
+              <.link
+                href={~p"/users/log_out"}
+                method="delete"
+                class="text-sm leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+              >
                 Log out
               </.link>
             </li>
           <% else %>
             <li>
-              <.link href={~p"/users/register"} class="text-sm leading-6 text-zinc-900 font-semibold hover:text-zinc-700">
+              <.link
+                href={~p"/users/register"}
+                class="text-sm leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+              >
                 Register
               </.link>
             </li>
             <li>
-              <.link href={~p"/users/log_in"} class="text-sm leading-6 text-zinc-900 font-semibold hover:text-zinc-700">
+              <.link
+                href={~p"/users/log_in"}
+                class="text-sm leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+              >
                 Log in
               </.link>
             </li>
@@ -90,7 +119,7 @@
 
     <%!-- Main Content --%>
     <main class="flex-grow">
-      <%= @inner_content %>
+      {@inner_content}
     </main>
 
     <%!-- Footer --%>

@@ -1,5 +1,5 @@
 <.header>
-  Fact check <%= @fact_check.id %>
+  Fact check {@fact_check.id}
   <:subtitle>This is a fact_check record from your database.</:subtitle>
   <:actions>
     <.link href={~p"/fact_checks/#{@fact_check}/edit"}>
@@ -9,10 +9,10 @@
 </.header>
 
 <.list>
-  <:item title="Source"><%= @fact_check.source %></:item>
-  <:item title="Status"><%= @fact_check.status %></:item>
-  <:item title="Notes"><%= @fact_check.notes %></:item>
-  <:item title="Verified at"><%= @fact_check.verified_at %></:item>
+  <:item title="Source">{@fact_check.source}</:item>
+  <:item title="Status">{@fact_check.status}</:item>
+  <:item title="Notes">{@fact_check.notes}</:item>
+  <:item title="Verified at">{@fact_check.verified_at}</:item>
 </.list>
 
 <.back navigate={~p"/fact_checks"}>Back to fact_checks</.back>

@@ -2,24 +2,47 @@
   <.error :if={@changeset.action}>
     Oops, something went wrong! Please check the errors below.
   </.error>
+
   <.input field={f[:title]} type="text" label="Title" />
   <.input field={f[:slug]} type="text" label="Slug" />
+
   <.input field={f[:description]} type="textarea" label="Description" />
   <.input field={f[:content]} type="textarea" label="Content" />
-  <.input field={f[:type]} type="select" label="Content Type" 
-                options={[
-                  {"Article", "article"},
-                  {"Opinion", "opinion"},
-                  {"How-to Guide", "how-to"},
-                  {"News", "news"}
-                ]} />
-  <.input field={f[:status]} type="text" label="Status" />
-  <.input field={f[:published_at]} type="datetime-local" label="Published at" />
-  <.input field={f[:featured]} type="checkbox" label="Featured" />
+  <div class="flex flex-col md:flex-row md:space-x-4">
+    <.input
+      field={f[:type]}
+      type="select"
+      label="Article Type"
+      options={[
+        {"Article", "article"},
+        {"Opinion", "opinion"},
+        {"How-to Guide", "how-to"},
+        {"News", "news"}
+      ]}
+    />
+
+    <.input field={f[:featured]} type="checkbox" label="Featured" />
+  </div>
+
   <.input field={f[:meta_title]} type="text" label="Meta title" />
   <.input field={f[:meta_description]} type="text" label="Meta description" />
-  <.input field={f[:reading_time]} type="number" label="Reading time" />
+
+  <div>
+    Estimated Reading time: {estimate_reading_time(@changeset)} min.
+  </div>
+
+  <div
+    :if={AltabarraWeb.ArticleFormHelpers.show_publishing_warning?(@changeset)}
+    class="alert alert-warning"
+  >
+    {publishing_warning_message(@changeset)}
+  </div>
+
   <:actions>
-    <.button>Save Article</.button>
+    <%= for target_state <- Altabarra.Content.Article.valid_transitions(@changeset.data.status) do %>
+      <.button type="submit" name="article[status]" value={target_state}>
+        {transition_button_text(@changeset.data.status, target_state)}
+      </.button>
+    <% end %>
   </:actions>
 </.simple_form>

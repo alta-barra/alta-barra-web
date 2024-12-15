@@ -59,7 +59,7 @@ defmodule Altabarra.Content do
   iex get_article_by_slug!('how-to-increase-corn-salinity')
   ** (Ecto.NoResultsError)
   """
-  def get_article_by_slug!(slug), do: Repo.get_by!(Article, [slug: slug])
+  def get_article_by_slug!(slug), do: Repo.get_by!(Article, slug: slug)
 
   @doc """
   Creates a article.
@@ -92,6 +92,10 @@ defmodule Altabarra.Content do
 
   """
   def update_article(%Article{} = article, attrs) do
+   IO.puts("updating an article")
+    
+    IO.inspect(article)
+    IO.inspect(attrs)
     article
     |> Article.changeset(attrs)
     |> Repo.update()

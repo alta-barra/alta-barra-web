@@ -37,9 +37,8 @@ defmodule AltabarraWeb.ArticleController do
     render(conn, :edit, article: article, changeset: changeset)
   end
 
-  def update(conn, %{"id" => id, "article" => article_params}) do
+  def update(conn, %{"id" => id, "article" => article_params} = args) do
     article = Content.get_article!(id)
-
     case Content.update_article(article, article_params) do
       {:ok, article} ->
         conn

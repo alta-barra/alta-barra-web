@@ -41,7 +41,10 @@ defmodule AltabarraWeb.ArticleCategoryControllerTest do
   describe "edit article_category" do
     setup [:create_article_category]
 
-    test "renders form for editing chosen article_category", %{conn: conn, article_category: article_category} do
+    test "renders form for editing chosen article_category", %{
+      conn: conn,
+      article_category: article_category
+    } do
       conn = get(conn, ~p"/article_categories/#{article_category}/edit")
       assert html_response(conn, 200) =~ "Edit Article category"
     end
@@ -51,7 +54,9 @@ defmodule AltabarraWeb.ArticleCategoryControllerTest do
     setup [:create_article_category]
 
     test "redirects when data is valid", %{conn: conn, article_category: article_category} do
-      conn = put(conn, ~p"/article_categories/#{article_category}", article_category: @update_attrs)
+      conn =
+        put(conn, ~p"/article_categories/#{article_category}", article_category: @update_attrs)
+
       assert redirected_to(conn) == ~p"/article_categories/#{article_category}"
 
       conn = get(conn, ~p"/article_categories/#{article_category}")
@@ -59,7 +64,9 @@ defmodule AltabarraWeb.ArticleCategoryControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn, article_category: article_category} do
-      conn = put(conn, ~p"/article_categories/#{article_category}", article_category: @invalid_attrs)
+      conn =
+        put(conn, ~p"/article_categories/#{article_category}", article_category: @invalid_attrs)
+
       assert html_response(conn, 200) =~ "Edit Article category"
     end
   end

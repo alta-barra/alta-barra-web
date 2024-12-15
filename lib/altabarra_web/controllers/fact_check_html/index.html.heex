@@ -8,10 +8,10 @@
 </.header>
 
 <.table id="fact_checks" rows={@fact_checks} row_click={&JS.navigate(~p"/fact_checks/#{&1}")}>
-  <:col :let={fact_check} label="Source"><%= fact_check.source %></:col>
-  <:col :let={fact_check} label="Status"><%= fact_check.status %></:col>
-  <:col :let={fact_check} label="Notes"><%= fact_check.notes %></:col>
-  <:col :let={fact_check} label="Verified at"><%= fact_check.verified_at %></:col>
+  <:col :let={fact_check} label="Source">{fact_check.source}</:col>
+  <:col :let={fact_check} label="Status">{fact_check.status}</:col>
+  <:col :let={fact_check} label="Notes">{fact_check.notes}</:col>
+  <:col :let={fact_check} label="Verified at">{fact_check.verified_at}</:col>
   <:action :let={fact_check}>
     <div class="sr-only">
       <.link navigate={~p"/fact_checks/#{fact_check}"}>Show</.link>

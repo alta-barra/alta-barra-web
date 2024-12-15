@@ -3,8 +3,18 @@ defmodule AltabarraWeb.FactCheckControllerTest do
 
   import Altabarra.ContentFixtures
 
-  @create_attrs %{status: "some status", source: "some source", notes: "some notes", verified_at: ~U[2024-11-15 14:58:00Z]}
-  @update_attrs %{status: "some updated status", source: "some updated source", notes: "some updated notes", verified_at: ~U[2024-11-16 14:58:00Z]}
+  @create_attrs %{
+    status: "some status",
+    source: "some source",
+    notes: "some notes",
+    verified_at: ~U[2024-11-15 14:58:00Z]
+  }
+  @update_attrs %{
+    status: "some updated status",
+    source: "some updated source",
+    notes: "some updated notes",
+    verified_at: ~U[2024-11-16 14:58:00Z]
+  }
   @invalid_attrs %{status: nil, source: nil, notes: nil, verified_at: nil}
 
   describe "index" do

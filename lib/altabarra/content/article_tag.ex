@@ -3,7 +3,6 @@ defmodule Altabarra.Content.ArticleTag do
   import Ecto.Changeset
 
   schema "article_tags" do
-
     field :article_id, :id
     field :tag_id, :id
 
