@@ -26,16 +26,16 @@ defmodule Altabarra.MixProject do
   defp deps do
     [
       # Phoenix and web-related
-      {:bandit, "~> 1.2"},
-      {:corsica, "~> 2.0"},
-      {:phoenix, "~> 1.7.14"},
-      {:phoenix_html, "~> 4.0"},
-      {:phoenix_live_dashboard, "~> 0.8.3"},
+      {:bandit, "~> 1.6"},
+      {:corsica, "~> 2.1"},
+      {:phoenix, "~> 1.7.18"},
+      {:phoenix_html, "~> 4.1"},
+      {:phoenix_live_dashboard, "~> 0.8.5"},
       {:phoenix_live_reload, "~> 1.5.3", only: :dev},
-      {:phoenix_live_view, "~> 0.20.17"},
+      {:phoenix_live_view, "~> 1.0.1"},
 
       # Database and Ecto
-      {:dns_cluster, "~> 0.1.1"},
+      {:dns_cluster, "~> 0.1.3"},
       {:ecto_sql, "~> 3.12"},
       {:phoenix_ecto, "~> 4.6"},
       {:postgrex, ">= 0.0.0"},
@@ -48,33 +48,33 @@ defmodule Altabarra.MixProject do
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
 
       # HTTP client and API-related
-      {:finch, "~> 0.13"},
-      {:tesla, "~> 1.11"},
+      {:finch, "~> 0.19"},
+      {:tesla, "~> 1.13"},
 
       # Utilities and helpers
-      {:floki, ">= 0.30.0", only: :test},
-      {:gettext, "~> 0.20"},
+      {:floki, "~> 0.37", only: :test},
+      {:gettext, "~> 0.26"},
       {:heroicons,
        github: "tailwindlabs/heroicons",
-       tag: "v2.1.1",
+       tag: "v2.2.0",
        sparse: "optimized",
        app: false,
        compile: false,
        depth: 1},
       {:jason, "~> 1.4"},
-      {:swoosh, "~> 1.5"},
+      {:swoosh, "~> 1.17"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:stac_validator, "~> 0.1", only: [:dev, :test]},
       {:memoize, "~> 1.4"},
 
       # Testing
-      {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
+      {:mix_test_watch, "~> 1.2", only: [:dev, :test], runtime: false},
       {:ex_machina, "~> 2.8.0", only: :test},
-      {:exvcr, "~> 0.11", only: :test},
+      {:exvcr, "~> 0.15", only: :test},
 
       # Telemetry and monitoring
       {:telemetry_metrics, "~> 1.0"},
-      {:telemetry_poller, "~> 1.0"}
+      {:telemetry_poller, "~> 1.1"}
     ]
   end
 
