@@ -2,6 +2,15 @@
   Alta Barra Blog
 </.header>
 
-<div>
-  Blog Entries
+
+<div class="flex flex-col gap-2 mt-8">
+  <%= for article <- @articles do %>
+  <a href={~p"/blog/#{article.slug}"} class="cursor-pointer hover:bg-gray-50">
+    <div>
+      <h4><%= article.title %></h4>
+      <p><%= article.description %></p>
+    </div>
+  </a>
+  <% end %>
 </div>
+
