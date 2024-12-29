@@ -165,7 +165,7 @@ defmodule Altabarra.Accounts.User do
     end
   end
 
-  def role_changeset(user, attrs, opts \\ []) do
+  def role_changeset(user, attrs) do
     user
     |> cast(attrs, [:role])
   end
