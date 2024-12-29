@@ -12,6 +12,7 @@
   rows={@article_categories}
   row_click={&JS.navigate(~p"/article_categories/#{&1}")}
 >
+  <:col :let={ac} label="Id">{ac.id}</:col>
   <:action :let={article_category}>
     <div class="sr-only">
       <.link navigate={~p"/article_categories/#{article_category}"}>Show</.link>

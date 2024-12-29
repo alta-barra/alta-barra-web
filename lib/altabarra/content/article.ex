@@ -11,11 +11,11 @@ defmodule Altabarra.Content.Article do
   )a
 
   @transitions %{
-    draft: [:draft, :in_review, :archived],
-    in_review: [:in_review, :draft, :published],
-    published: [:published, :unpublished, :archived],
-    unpublished: [:unpublished, :draft, :archived],
-    archived: [:archived, :draft]
+    draft: [:in_review, :archived],
+    in_review: [:draft, :published],
+    published: [:unpublished, :archived],
+    unpublished: [:draft, :archived],
+    archived: [:draft]
   }
 
   schema "articles" do
@@ -31,28 +31,20 @@ defmodule Altabarra.Content.Article do
     field :meta_description, :string
     field :reading_time, :integer
 
-    belongs_to :author, Altabarra.Accounts.User, foreign_key: :author_id, on_replace: :nilify
+    belongs_to :author, Altabarra.Accounts.User, on_replace: :nilify
     has_many :fact_checks, Altabarra.Content.FactCheck
 
     timestamps(type: :utc_datetime)
   end
 
+  defp all_fields() do
+    __MODULE__.__schema__(:fields)
+  end
+
   @doc false
   def changeset(article, attrs) do
     article
-    |> cast(attrs, [
-      :slug,
-      :title,
-      :description,
-      :content,
-      :type,
-      :status,
-      :published_at,
-      :featured,
-      :meta_title,
-      :meta_description,
-      :reading_time
-    ])
+    |> cast(attrs, all_fields())
     |> validate_required([
       :slug,
       :title,
@@ -61,15 +53,16 @@ defmodule Altabarra.Content.Article do
       :type,
       :status,
       :published_at,
-      :featured,
       :meta_title,
       :meta_description,
-      :reading_time
+      :reading_time,
+      :author_id
     ])
     |> validate_status_transition()
+    |> foreign_key_constraint(:author_id)
   end
 
-  def valid_transitions(status), do: @transitions[status]
+  def valid_transitions(status), do: [status] ++ @transitions[status]
 
   defp validate_status_transition(changeset) do
     case {get_field(changeset, :status), get_change(changeset, :status)} do

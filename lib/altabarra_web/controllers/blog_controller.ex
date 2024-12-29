@@ -2,7 +2,6 @@ defmodule AltabarraWeb.BlogController do
   use AltabarraWeb, :controller
 
   alias Altabarra.Content
-  alias Altabarra.Content.Article
 
   def index(conn, _) do
     articles = Content.list_articles()

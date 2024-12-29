@@ -6,6 +6,8 @@ defmodule AltabarraWeb.SitemapController do
 
   alias Altabarra.Content, as: Blog
 
+  @searchable_routes ["contact", "services", "blog", "apis"]
+
   def index(conn, _params) do
     conn
     |> put_resp_content_type("application/xml")
@@ -24,11 +26,11 @@ defmodule AltabarraWeb.SitemapController do
 
   defp get_static_pages() do
     child_pages =
-      ["contact", "services", "blog", "apis"]
+      @searchable_routes
       |> Enum.map(fn path ->
         %{
-          url: ~p"/#{path}",
-          updated_at: DateTime.utc_now(),
+          url: "/#{path}",
+          updated_at: DateTime.utc_now(), #TODO deep magic with git timestamps?
           changefreq: "monthly",
           priority: 0.9
         }
@@ -44,7 +46,7 @@ defmodule AltabarraWeb.SitemapController do
     %{
       url: ~p"/blog/#{post.slug}",
       updated_at: post.updated_at || post.published_at,
-      changefreq: "weekly",
+      changefreq: "monthly",
       priority: 0.6
     }
   end
