@@ -11,7 +11,7 @@ defmodule Altabarra.Accounts.UserNotifier do
     email =
       new()
       |> to(recipient)
-      |> from({"Altabarra", "contact@example.com"})
+      |> from({"Alta-Barra", "contact@alta-barra.com"})
       |> subject(subject)
       |> text_body(body)
 
