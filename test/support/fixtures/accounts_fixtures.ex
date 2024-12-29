@@ -4,8 +4,8 @@ defmodule Altabarra.AccountsFixtures do
   entities via the `Altabarra.Accounts` context.
   """
 
-  def unique_user_email, do: "user#{System.unique_integer()}@example.com"
-  def valid_user_password, do: "hello world!"
+  def unique_user_email, do: "user#{System.unique_integer()}@alta-barra.com"
+  def valid_user_password, do: "altabarra_awesome_password!"
 
   def valid_user_attributes(attrs \\ %{}) do
     Enum.into(attrs, %{
@@ -21,6 +21,17 @@ defmodule Altabarra.AccountsFixtures do
       |> Altabarra.Accounts.register_user()
 
     user
+  end
+
+  def admin_fixture(attrs \\ %{}) do
+    {:ok, user} =
+      attrs
+      |> valid_user_attributes()
+      |> Altabarra.Accounts.register_user()
+
+    user
+    |> Altabarra.Accounts.User.role_changeset(%{role: "admin"})
+    |> Altabarra.Repo.update!()
   end
 
   def extract_user_token(fun) do

@@ -164,4 +164,9 @@ defmodule Altabarra.Accounts.User do
       add_error(changeset, :current_password, "is not valid")
     end
   end
+
+  def role_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:role])
+  end
 end

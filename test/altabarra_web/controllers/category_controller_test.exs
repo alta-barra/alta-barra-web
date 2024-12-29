@@ -12,12 +12,10 @@ defmodule AltabarraWeb.CategoryControllerTest do
   }
   @invalid_attrs %{name: nil, description: nil, slug: nil}
 
-  setup do
-    %{user: user_fixture()}
-  end
-
+  setup :register_and_log_in_admin
+  
   describe "index" do
-    test "lists all categories", %{conn: conn, user: user} do
+    test "lists all categories", %{conn: conn} do
       conn = get(conn, ~p"/categories")
       assert html_response(conn, 200) =~ "Listing Categories"
     end
