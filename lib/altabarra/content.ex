@@ -92,11 +92,6 @@ defmodule Altabarra.Content do
 
   """
   def update_article(%Article{} = article, attrs) do
-    IO.puts("updating an article")
-
-    IO.inspect(article)
-    IO.inspect(attrs)
-
     article
     |> Article.changeset(attrs)
     |> Repo.update()

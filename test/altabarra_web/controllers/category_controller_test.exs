@@ -2,7 +2,6 @@ defmodule AltabarraWeb.CategoryControllerTest do
   use AltabarraWeb.ConnCase
 
   import Altabarra.ContentFixtures
-  import Altabarra.AccountsFixtures
 
   @create_attrs %{name: "some name", description: "some description", slug: "some slug"}
   @update_attrs %{
