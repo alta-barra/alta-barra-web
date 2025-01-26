@@ -80,9 +80,8 @@ defmodule Altabarra.ContentFixtures do
     {:ok, category} =
       attrs
       |> Enum.into(%{
-        description: "some description",
-        name: "some name",
-        slug: "some slug"
+        description: "category description",
+        name: "category name"
       })
       |> Altabarra.Content.create_category()
 

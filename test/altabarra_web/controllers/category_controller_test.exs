@@ -12,7 +12,7 @@ defmodule AltabarraWeb.CategoryControllerTest do
   @invalid_attrs %{name: nil, description: nil, slug: nil}
 
   setup :register_and_log_in_admin
-  
+
   describe "index" do
     test "lists all categories", %{conn: conn} do
       conn = get(conn, ~p"/categories")
