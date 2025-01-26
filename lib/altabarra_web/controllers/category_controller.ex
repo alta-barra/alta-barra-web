@@ -1,6 +1,7 @@
 defmodule AltabarraWeb.CategoryController do
   use AltabarraWeb, :controller
 
+  alias Altabarra.Repo
   alias Altabarra.Content
   alias Altabarra.Content.Category
 
@@ -10,11 +11,14 @@ defmodule AltabarraWeb.CategoryController do
   end
 
   def new(conn, _params) do
+    categories = Content.list_categories()
     changeset = Content.change_category(%Category{})
-    render(conn, :new, changeset: changeset)
+    render(conn, :new, changeset: changeset, categories: categories)
   end
 
   def create(conn, %{"category" => category_params}) do
+    categories = Content.list_categories()
+
     case Content.create_category(category_params) do
       {:ok, category} ->
         conn
@@ -22,19 +26,20 @@ defmodule AltabarraWeb.CategoryController do
         |> redirect(to: ~p"/categories/#{category}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :new, changeset: changeset)
+        render(conn, :new, changeset: changeset, categories: categories)
     end
   end
 
   def show(conn, %{"id" => id}) do
-    category = Content.get_category!(id)
+    category = Content.get_category!(id) |> Repo.preload(:parent)
     render(conn, :show, category: category)
   end
 
   def edit(conn, %{"id" => id}) do
+    categories = Content.list_categories()
     category = Content.get_category!(id)
     changeset = Content.change_category(category)
-    render(conn, :edit, category: category, changeset: changeset)
+    render(conn, :edit, category: category, changeset: changeset, categories: categories)
   end
 
   def update(conn, %{"id" => id, "category" => category_params}) do
@@ -47,7 +52,8 @@ defmodule AltabarraWeb.CategoryController do
         |> redirect(to: ~p"/categories/#{category}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :edit, category: category, changeset: changeset)
+        categories = Content.list_categories()
+        render(conn, :edit, category: category, changeset: changeset, categories: categories)
     end
   end
 

@@ -6,7 +6,7 @@ defmodule Altabarra.Content do
   import Ecto.Query, warn: false
   alias Altabarra.Repo
 
-  alias Altabarra.Content.Article
+  alias Altabarra.Content.{Article, Category}
 
   @doc """
   Returns the list of articles.

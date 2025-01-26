@@ -9,7 +9,6 @@
 
 <.table id="categories" rows={@categories} row_click={&JS.navigate(~p"/categories/#{&1}")}>
   <:col :let={category} label="Name">{category.name}</:col>
-  <:col :let={category} label="Slug">{category.slug}</:col>
   <:col :let={category} label="Description">{category.description}</:col>
   <:action :let={category}>
     <div class="sr-only">
